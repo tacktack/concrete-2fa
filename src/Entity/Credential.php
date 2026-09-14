@@ -60,7 +60,7 @@ class Credential
     protected $lastTimestep;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", options={"default": 0})
      *
      * @var int
      */
