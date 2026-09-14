@@ -1,0 +1,33 @@
+{
+    "name": "tacktack/concrete-2fa",
+    "description": "Double authentification TOTP (Google Authenticator, Authy, ...) pour Concrete CMS 9.",
+    "type": "concrete5-package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tack Tack"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "pragmarx/google2fa": "^9.0",
+        "bacon/bacon-qr-code": "^3.0",
+        "defuse/php-encryption": "^2.3"
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "TackTack\\TwoFactor\\": "src/"
+        }
+    },
+    "extra": {
+        "installer-name": "tacktack_2fa"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
