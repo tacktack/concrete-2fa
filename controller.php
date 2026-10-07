@@ -95,6 +95,13 @@ class Controller extends Package
      */
     protected function registerAutoload()
     {
+        // Composer racine déjà opérationnel : charger en plus un vendor/ de
+        // développement (pest, phpunit, symfony/console, psr/log 3…) entrerait
+        // en conflit avec les versions du cœur (erreur fatale à la compilation).
+        if (class_exists(\PragmaRX\Google2FA\Google2FA::class)) {
+            return;
+        }
+
         if (file_exists($this->getPackagePath() . '/vendor/autoload.php')) {
             require $this->getPackagePath() . '/vendor/autoload.php';
         }
