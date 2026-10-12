@@ -13,9 +13,6 @@ Testée avec **PHP 8.4** et **Concrete CMS 9.5 ou plus récent** (voir « Compat
   OAuth, « rester connecté », « Se connecter en tant que »).
 - Pas de « mot de passe d'urgence » : codes de secours, réinitialisation par un administrateur ou ligne de commande.
 
-Le document d'architecture qui fige les décisions de conception et la liste des tests de contournement vit dans
-le dépôt du premier site intégrateur : `docs/paquet-2fa.md` (dépôt Oli).
-
 ## Compatibilité
 
 Le paquet fonctionne avec **PHP 8.4** sur **Concrete CMS 9.5 ou plus récent** (version de référence : 9.5.4).
@@ -75,9 +72,8 @@ Conserver la clé dans un gestionnaire de mots de passe.
 ### 3. Mettre la clé à disposition de PHP
 
 La variable s'appelle `TWOFA_ENCRYPTION_KEY`. Le paquet la lit avec `getenv()` : elle doit donc être visible de PHP,
-par exemple par un `.env` si le projet le charge (c'est le cas d'Oli : `symfony/dotenv` dans
-`application/bootstrap/autoload.php`, avec `usePutenv()`), par une variable du conteneur, ou par la configuration
-du serveur. Si PHP-FPM nettoie son environnement
+par exemple par un `.env` si le projet le charge (avec `symfony/dotenv`, il faut `usePutenv()` pour que `getenv()`
+la voie), par une variable du conteneur, ou par la configuration du serveur. Si PHP-FPM nettoie son environnement
 (`clear_env = yes`), la déclarer explicitement dans le pool.
 
 ```
@@ -98,8 +94,8 @@ restent utilisables ; `2fa:reset --all` pour repartir de zéro).
 concrete/bin/concrete c5:package:install tacktack_2fa
 ```
 
-(adapter le chemin à la racine du projet : `vendor/bin/concrete` si le projet l'expose, comme Oli). Si le CLI refuse de tourner en root, ajouter `--allow-as-root` ou utiliser l'utilisateur du
-serveur web.
+(adapter le chemin à la racine du projet : `vendor/bin/concrete` si le projet l'expose). Si le CLI refuse de
+tourner en root, ajouter `--allow-as-root` ou utiliser l'utilisateur du serveur web.
 
 L'installation crée les deux tables (`TwoFactorCredentials`, `TwoFactorRecoveryCodes`), la catégorie de contrôle
 d'accès IP, la permission `tacktack_2fa_reset` (accordée aux Administrateurs) et deux pages :
