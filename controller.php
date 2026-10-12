@@ -23,9 +23,9 @@ use TackTack\TwoFactor\Service\SecretCipher;
 /**
  * Double authentification TOTP pour Concrete CMS 9.
  *
- * Architecture figée dans docs/paquet-2fa.md (dépôt Oli, ce paquet vit dans un dépôt
- * séparé). Ne pas rejouer les décisions qui y sont marquées "figée" sans les valider
- * d'abord dans ce document.
+ * Le contrôle se fait par un middleware HTTP en échec fermé : un utilisateur soumis à la 2FA
+ * sans marqueur « vérifié » en session n'accède à rien d'autre que l'écran de code et la
+ * déconnexion. Voir le README du dépôt pour l'installation et la configuration.
  */
 class Controller extends Package
 {

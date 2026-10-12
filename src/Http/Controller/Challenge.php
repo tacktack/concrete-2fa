@@ -164,8 +164,8 @@ class Challenge extends Controller
     }
 
     /**
-     * Déconnexion puis redirection. Le thème Oli n'affiche pas les messages flash : le délai
-     * expiré passe par /login/session_invalidated, dont le message est rendu par le cœur ;
+     * Déconnexion puis redirection. Les messages flash ne sont pas rendus de façon fiable par
+     * tous les thèmes : le délai expiré passe par /login/session_invalidated, dont le message est rendu par le cœur ;
      * le verrou reste silencieux (message générique, §3.4) et l'écran de code le redit à la
      * reconnexion.
      */

@@ -58,6 +58,6 @@ it('refuse proprement un secret invalide', function () {
 });
 
 it('construit une URI otpauth encodée', function () {
-    $uri = $this->totp->provisioningUri('Oli & Co', 'a@b.fr', $this->secret);
-    expect($uri)->toStartWith('otpauth://totp/')->toContain('issuer=Oli');
+    $uri = $this->totp->provisioningUri('Example & Co', 'a@b.fr', $this->secret);
+    expect($uri)->toStartWith('otpauth://totp/')->toContain('issuer=Example');
 });
