@@ -5,17 +5,12 @@ defined('C5_EXECUTE') or die('Access Denied.');
 /**
  * @var string      $secret     secret groupé par 4 caractères
  * @var string      $qrSvg      SVG inline généré côté serveur
- * @var string|null $error
  * @var string      $formAction
  * @var string      $tokenName
  */
 $token = app('token');
 ?>
 <p><?= t('Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password…), then enter the 6-digit code it shows.') ?></p>
-
-<?php if (!empty($error)) { ?>
-    <div class="alert alert-danger" role="alert"><?= h($error) ?></div>
-<?php } ?>
 
 <div class="mb-3" aria-label="<?= h(t('QR code')) ?>"><?= $qrSvg /* SVG produit par bacon-qr-code, aucune donnée utilisateur */ ?></div>
 

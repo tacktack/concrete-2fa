@@ -68,7 +68,6 @@ class TwoFactor extends AccountPageController
         $this->set('qrSvg', $data['qrSvg']);
         $this->set('formAction', (string) $this->action('confirm'));
         $this->set('tokenName', self::TOKEN);
-        $this->set('error', null);
         if (!headers_sent()) {
             header('Cache-Control: no-store, private');
         }
