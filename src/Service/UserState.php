@@ -2,7 +2,6 @@
 
 namespace TackTack\TwoFactor\Service;
 
-use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Entity\User\User as UserEntity;
 use Concrete\Core\User\User;
 use DateTimeImmutable;
@@ -25,10 +24,10 @@ class UserState
     /** @var SessionState */
     protected $session;
 
-    /** @var Repository */
+    /** @var PolicyConfig */
     protected $config;
 
-    public function __construct(EntityManagerInterface $em, PolicyResolver $resolver, SessionState $session, Repository $config)
+    public function __construct(EntityManagerInterface $em, PolicyResolver $resolver, SessionState $session, PolicyConfig $config)
     {
         $this->em = $em;
         $this->resolver = $resolver;
@@ -63,7 +62,7 @@ class UserState
         if ((int) $user->getUserID() === USER_SUPER_ID) {
             return true;
         }
-        $required = array_map('intval', (array) $this->config->get('tacktack_2fa::policy.groups', []));
+        $required = $this->config->groups();
 
         return count(array_intersect($required, array_map('intval', $user->getUserGroups()))) > 0;
     }
@@ -94,7 +93,7 @@ class UserState
             $enrolled,
             $concerned,
             $started,
-            (int) $this->config->get('tacktack_2fa::policy.grace_days', 7),
+            $this->config->graceDays(),
             $this->session->getVerified()
         );
     }

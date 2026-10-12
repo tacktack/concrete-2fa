@@ -2,7 +2,6 @@
 
 namespace TackTack\TwoFactor\Service;
 
-use Concrete\Core\Config\Repository\Repository;
 use Concrete\Core\Entity\User\User as UserEntity;
 use Concrete\Core\Logging\Channels;
 use Concrete\Core\Logging\LoggerFactory;
@@ -39,7 +38,7 @@ class EnrollmentService
         QrCodeService $qr,
         SessionState $session,
         Notifier $notifier,
-        Repository $config,
+        PolicyConfig $config,
         SiteService $sites,
         LoggerFactory $loggerFactory
     ) {
@@ -162,9 +161,7 @@ class EnrollmentService
 
     protected function issuer(): string
     {
-        $issuer = $this->config->get('tacktack_2fa::policy.issuer');
-
-        return is_string($issuer) && $issuer !== '' ? $issuer : $this->siteName();
+        return $this->config->issuer() ?? $this->siteName();
     }
 
     protected function siteName(): string

@@ -35,6 +35,11 @@ class Notifier
         $this->send('two_factor_codes_regenerated', $email, ['siteName' => $siteName]);
     }
 
+    public function resetByOther(string $email, string $siteName): void
+    {
+        $this->send('two_factor_reset', $email, ['siteName' => $siteName]);
+    }
+
     public function recoveryCodeUsed(string $email, string $siteName, int $remaining): void
     {
         $this->send('two_factor_recovery_used', $email, ['siteName' => $siteName, 'remaining' => $remaining]);

@@ -61,7 +61,7 @@ class Controller extends Package
     /**
      * @var string
      */
-    protected $pkgVersion = '0.5.0';
+    protected $pkgVersion = '0.6.1';
 
     /**
      * Classes dans packages/tacktack_2fa/src/ → namespace \TackTack\TwoFactor.
@@ -91,6 +91,7 @@ class Controller extends Package
         $this->registerAutoload();
         $this->app->make('router')->loadRouteList(new RouteList());
         $this->registerServices();
+        $this->registerCommands();
 
         // Point de contrôle HTTP. Priorité 20 : à l'intérieur de CookieMiddleware (10), pour
         // que les cookies mis en file par la suite soient appliqués à la réponse (§3.3).
@@ -103,11 +104,31 @@ class Controller extends Package
     }
 
     /**
+     * Commandes 2fa:* (§3.10), enregistrées seulement en ligne de commande. Le conteneur
+     * « console » n'existe pas encore pendant on_start : on attend l'événement du cœur.
+     */
+    protected function registerCommands()
+    {
+        if (!$this->app->isRunThroughCommandLineInterface()) {
+            return;
+        }
+        $this->app['director']->addListener('on_before_console_run', function () {
+            $console = $this->app->make('console');
+            $console->add(new \TackTack\TwoFactor\Command\StatusCommand());
+            $console->add(new \TackTack\TwoFactor\Command\ResetCommand());
+            $console->add(new \TackTack\TwoFactor\Command\GenerateKeyCommand());
+        });
+    }
+
+    /**
      * Services partagés : la session et la configuration du paquet sont résolues à
      * l'usage, pas à l'enregistrement.
      */
     protected function registerServices()
     {
+        $this->app->singleton(\TackTack\TwoFactor\Service\PolicyConfig::class, function ($app) {
+            return new \TackTack\TwoFactor\Service\PolicyConfig($app->make('config'), $app->make('config/database'));
+        });
         $this->app->singleton(\TackTack\TwoFactor\Service\SessionState::class, function ($app) {
             return new \TackTack\TwoFactor\Service\SessionState($app->make('session'));
         });
@@ -174,13 +195,18 @@ class Controller extends Package
      */
     protected function installSinglePages(PackageEntity $pkg): void
     {
-        $path = '/account/two_factor';
-        if (!Page::getByPath($path)->isError()) {
-            return;
-        }
-        $page = SinglePage::add($path, $pkg);
-        if ($page) {
-            $page->update(['cName' => t('Two-factor authentication')]);
+        $pages = [
+            '/account/two_factor' => t('Two-factor authentication'),
+            '/dashboard/system/registration/two_factor' => t('Two-Factor Authentication'),
+        ];
+        foreach ($pages as $path => $name) {
+            if (!Page::getByPath($path)->isError()) {
+                continue;
+            }
+            $page = SinglePage::add($path, $pkg);
+            if ($page) {
+                $page->update(['cName' => $name]);
+            }
         }
     }
 
