@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use TackTack\TwoFactor\Service\EnrollmentException;
 use TackTack\TwoFactor\Service\EnrollmentService;
 use TackTack\TwoFactor\Service\PolicyResolver;
+use TackTack\TwoFactor\Service\RememberCookie;
 use TackTack\TwoFactor\Service\UserState;
 
 /**
@@ -27,12 +28,14 @@ class Enrollment extends Controller
 
     protected $state;
     protected $enrollment;
+    protected $remember;
 
-    public function __construct(UserState $state, EnrollmentService $enrollment)
+    public function __construct(UserState $state, EnrollmentService $enrollment, RememberCookie $remember)
     {
         parent::__construct();
         $this->state = $state;
         $this->enrollment = $enrollment;
+        $this->remember = $remember;
         $this->setTheme(VIEW_CORE_THEME);
         $this->view->setPackageHandle('tacktack_2fa');
     }
@@ -65,6 +68,7 @@ class Enrollment extends Controller
             return $this->showForm($e->getMessage());
         }
 
+        $this->remember->restore($user);
         $this->setViewPath('/two_factor/recovery_codes');
         $this->view->setPackageHandle('tacktack_2fa');
         $this->set('codes', $codes);

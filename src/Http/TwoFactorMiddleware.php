@@ -12,6 +12,7 @@ use Concrete\Core\User\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use TackTack\TwoFactor\Service\PolicyResolver;
+use TackTack\TwoFactor\Service\RememberCookie;
 use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
@@ -67,6 +68,12 @@ class TwoFactorMiddleware implements MiddlewareInterface
         if (in_array($state, [PolicyResolver::NOT_REQUIRED, PolicyResolver::VERIFIED, PolicyResolver::GRACE], true)) {
             return $frame->next($request);
         }
+
+        // 7 (avancé avant la liste blanche) : le cookie « rester connecté » est supprimé dès
+        // qu'on constate l'étape 2FA, y compris sur une page en liste blanche. Ainsi aucun
+        // chemin (accès direct à /ccm/2fa/challenge, fermeture du navigateur) ne laisse un
+        // cookie capable de reconnecter sans code.
+        $this->app->make(RememberCookie::class)->suspend((int) $user->getUserID());
 
         // 6. Liste blanche.
         if (PathWhitelist::matches($request->getPathInfo())) {

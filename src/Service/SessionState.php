@@ -15,6 +15,7 @@ class SessionState
     public const VERIFIED_KEY = 'tacktack_2fa.verified';
     public const ENROLL_KEY = 'tacktack_2fa.enroll';
     public const PENDING_SINCE_KEY = 'tacktack_2fa.pending_since';
+    public const REMEMBER_KEY = 'tacktack_2fa.remember';
 
     /** @var SessionInterface */
     protected $session;
@@ -95,5 +96,29 @@ class SessionState
     public function clearPendingSince(): void
     {
         $this->session->remove(self::PENDING_SINCE_KEY);
+    }
+
+    /**
+     * Type d'authentification du cookie « rester connecté » mis de côté pendant l'étape 2FA
+     * (§3.3 étape 7), à reposer après un code valide.
+     */
+    public function getRememberHandle(int $uID): ?string
+    {
+        $value = $this->session->get(self::REMEMBER_KEY);
+        if (!is_array($value) || (int) ($value['uID'] ?? 0) !== $uID || !is_string($value['handle'] ?? null)) {
+            return null;
+        }
+
+        return $value['handle'];
+    }
+
+    public function setRememberHandle(int $uID, string $handle): void
+    {
+        $this->session->set(self::REMEMBER_KEY, ['uID' => $uID, 'handle' => $handle]);
+    }
+
+    public function clearRememberHandle(): void
+    {
+        $this->session->remove(self::REMEMBER_KEY);
     }
 }

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use TackTack\TwoFactor\Service\ChallengeService;
 use TackTack\TwoFactor\Service\Notifier;
 use TackTack\TwoFactor\Service\PolicyResolver;
+use TackTack\TwoFactor\Service\RememberCookie;
 use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
@@ -33,8 +34,9 @@ class Challenge extends Controller
     protected $challenge;
     protected $notifier;
     protected $sites;
+    protected $remember;
 
-    public function __construct(UserState $state, SessionState $session, ChallengeService $challenge, Notifier $notifier, SiteService $sites)
+    public function __construct(UserState $state, SessionState $session, ChallengeService $challenge, Notifier $notifier, SiteService $sites, RememberCookie $remember)
     {
         parent::__construct();
         $this->state = $state;
@@ -42,6 +44,7 @@ class Challenge extends Controller
         $this->challenge = $challenge;
         $this->notifier = $notifier;
         $this->sites = $sites;
+        $this->remember = $remember;
         $this->setTheme(VIEW_CORE_THEME);
         $this->view->setPackageHandle('tacktack_2fa');
     }
@@ -94,6 +97,7 @@ class Challenge extends Controller
         $this->app['session']->migrate(true);
         $this->session->markVerified($uID);
         $this->session->clearPendingSince();
+        $this->remember->restore($user);
 
         if ($result === ChallengeService::OK_RECOVERY) {
             $email = (string) $user->getUserInfoObject()->getUserEmail();
