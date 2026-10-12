@@ -10,7 +10,10 @@ $token = app('token');
 ?>
 <h2><?= t('Two-factor authentication') ?></h2>
 
-<?php if ($mode === 'codes') { ?>
+<?php if ($mode === 'impersonation') { ?>
+    <p class="text-muted"><?= t('Two-factor settings are not available while you are signed in as this user.') ?></p>
+
+<?php } elseif ($mode === 'codes') { ?>
     <?php $view->element('recovery_codes', ['codes' => $codes, 'continueUrl' => $continueUrl], 'tacktack_2fa'); ?>
 
 <?php } elseif ($mode === 'enroll') { ?>

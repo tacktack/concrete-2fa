@@ -11,6 +11,7 @@ use TackTack\TwoFactor\Service\EnrollmentException;
 use TackTack\TwoFactor\Service\EnrollmentService;
 use TackTack\TwoFactor\Service\PolicyResolver;
 use TackTack\TwoFactor\Service\RememberCookie;
+use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
 /**
@@ -87,6 +88,11 @@ class Enrollment extends Controller
             return new RedirectResponse((string) $this->app->make('url/manager')->resolve(['/login']));
         }
 
+        // Session ouverte par le super utilisateur (§3.3.1) : rien à vérifier ni à enrôler ici.
+        if ($this->sessionState()->isImpersonating((int) $user->getUserID())) {
+            return $this->to('/');
+        }
+
         $state = $this->state->resolve($user);
         if ($state === PolicyResolver::ENROLL_REQUIRED) {
             return null;
@@ -95,6 +101,11 @@ class Enrollment extends Controller
         $target = $state === PolicyResolver::PENDING ? '/ccm/2fa/challenge' : '/';
 
         return new RedirectResponse((string) $this->app->make('url/manager')->resolve([$target]));
+    }
+
+    protected function sessionState(): SessionState
+    {
+        return $this->app->make(SessionState::class);
     }
 
     protected function showForm(?string $error): Response

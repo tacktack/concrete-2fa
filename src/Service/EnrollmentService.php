@@ -69,11 +69,12 @@ class EnrollmentService
      */
     public function begin(User $user): array
     {
+        $uID = (int) $user->getUserID();
+        $this->assertNotImpersonating($uID);
         if ($this->isEnrolled($user)) {
             throw new EnrollmentException(t('Two-factor authentication is already set up for this account.'));
         }
 
-        $uID = (int) $user->getUserID();
         $secret = $this->session->getPendingSecret($uID);
         if ($secret === null) {
             $secret = $this->totp->generateSecret();
@@ -99,6 +100,7 @@ class EnrollmentService
     public function confirm(User $user, string $code): array
     {
         $uID = (int) $user->getUserID();
+        $this->assertNotImpersonating($uID);
         $log = $this->loggerFactory->createLogger(Channels::CHANNEL_AUTHENTICATION);
 
         $secret = $this->session->getPendingSecret($uID);
@@ -159,6 +161,19 @@ class EnrollmentService
         }
 
         return $codes;
+    }
+
+    /**
+     * Pendant une session ouverte par le super utilisateur (« Se connecter en tant que »), la 2FA
+     * de la cible ne se modifie pas : sinon on pourrait y enrôler son propre appareil (§3.3.1).
+     *
+     * @throws EnrollmentException
+     */
+    protected function assertNotImpersonating(int $uID): void
+    {
+        if ($this->session->isImpersonating($uID)) {
+            throw new EnrollmentException(t('Access denied.'));
+        }
     }
 
     protected function issuer(): string

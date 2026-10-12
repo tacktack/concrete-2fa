@@ -8,6 +8,7 @@ use TackTack\TwoFactor\Service\AccountService;
 use TackTack\TwoFactor\Service\EnrollmentException;
 use TackTack\TwoFactor\Service\EnrollmentService;
 use TackTack\TwoFactor\Service\PolicyResolver;
+use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
 /**
@@ -107,6 +108,9 @@ class TwoFactor extends AccountPageController
      */
     protected function assertVerified(): void
     {
+        if ($this->isImpersonating()) {
+            throw new EnrollmentException(t('Access denied.'));
+        }
         $state = $this->app->make(UserState::class)->resolve($this->app->make(User::class));
         if ($state !== PolicyResolver::VERIFIED) {
             throw new EnrollmentException(t('Access denied.'));
@@ -121,9 +125,22 @@ class TwoFactor extends AccountPageController
         $this->noStore();
     }
 
+    protected function isImpersonating(): bool
+    {
+        return $this->app->make(SessionState::class)->isImpersonating((int) $this->app->make(User::class)->getUserID());
+    }
+
     protected function showStatus(): void
     {
         $user = $this->app->make(User::class);
+
+        // Session ouverte par le super utilisateur (§3.3.1) : la 2FA de la cible ne se consulte
+        // ni ne se modifie ici.
+        if ($this->isImpersonating()) {
+            $this->set('mode', 'impersonation');
+
+            return;
+        }
         $enrollment = $this->app->make(EnrollmentService::class);
 
         if ($enrollment->isEnrolled($user)) {

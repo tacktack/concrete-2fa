@@ -74,6 +74,7 @@ class AccountService
     public function regenerateCodes(User $user, string $code): array
     {
         $uID = (int) $user->getUserID();
+        $this->assertNotImpersonating($uID);
         $this->assertCode($uID, $code, false);
 
         $codes = $this->recovery->generate();
@@ -102,6 +103,7 @@ class AccountService
     public function disable(User $user, string $password, string $code): void
     {
         $uID = (int) $user->getUserID();
+        $this->assertNotImpersonating($uID);
 
         if ($this->state->isRequired($user)) {
             throw new EnrollmentException(t('Two-factor authentication is required for your account and cannot be disabled.'));
@@ -151,6 +153,19 @@ class AccountService
         }
         $site = $this->sites->getSite();
         $send($email, $site ? (string) $site->getSiteName() : 'Concrete');
+    }
+
+    /**
+     * Pendant une session ouverte par le super utilisateur (« Se connecter en tant que »), la 2FA
+     * de la cible ne se modifie pas : sinon on pourrait y enrôler son propre appareil (§3.3.1).
+     *
+     * @throws EnrollmentException
+     */
+    protected function assertNotImpersonating(int $uID): void
+    {
+        if ($this->session->isImpersonating($uID)) {
+            throw new EnrollmentException(t('Access denied.'));
+        }
     }
 
     protected function log()

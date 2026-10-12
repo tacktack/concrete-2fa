@@ -122,6 +122,11 @@ class Challenge extends Controller
             return $this->to('/login');
         }
 
+        // Session ouverte par le super utilisateur (§3.3.1) : rien à vérifier ni à enrôler ici.
+        if ($this->sessionState()->isImpersonating((int) $user->getUserID())) {
+            return $this->to('/');
+        }
+
         $state = $this->state->resolve($user);
         if ($state === PolicyResolver::PENDING) {
             // Le middleware pose déjà ce marqueur ; ceci couvre un appel sans lui.
@@ -131,6 +136,11 @@ class Challenge extends Controller
         }
 
         return $this->to($state === PolicyResolver::ENROLL_REQUIRED ? '/ccm/2fa/enroll' : '/');
+    }
+
+    protected function sessionState(): SessionState
+    {
+        return $this->session;
     }
 
     protected function showForm(?string $error): Response

@@ -143,6 +143,9 @@ msgstr "Si la double authentification est obligatoire pour votre compte, il vous
 msgid "If you did not expect this, contact the site administrator."
 msgstr "Si vous ne vous y attendiez pas, contactez l'administrateur du site."
 
+msgid "Two-factor settings are not available while you are signed in as this user."
+msgstr "Les réglages de double authentification ne sont pas disponibles lorsque vous êtes connecté en tant que cet utilisateur."
+
 msgid "Two-factor authentication is enabled on your account."
 msgstr "La double authentification est activée sur votre compte."
 

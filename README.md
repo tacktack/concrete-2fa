@@ -89,7 +89,7 @@ Plus aucun administrateur ne peut se connecter : sur le serveur, `2fa:reset <adm
 - Les appels d'API authentifiés par jeton OAuth, sans session, ne passent pas par le contrôle 2FA.
 - Un enrôlement forcé peut être fait par quelqu'un qui connaît déjà le mot de passe ; l'e-mail « 2FA activée » sert de détection.
 - La ligne de commande n'est pas soumise à la 2FA.
-- « Se connecter en tant que » demande le code de l'utilisateur cible.
+- « Se connecter en tant que » demande le code de l'utilisateur cible, **sauf pour le super utilisateur** (uID 1) : son passage est exempté de l'étape 2FA, journalisé (canal Authentification) et sans modification possible de la 2FA de la cible pendant la session.
 
 ## Développement
 

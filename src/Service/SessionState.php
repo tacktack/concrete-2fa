@@ -16,6 +16,7 @@ class SessionState
     public const ENROLL_KEY = 'tacktack_2fa.enroll';
     public const PENDING_SINCE_KEY = 'tacktack_2fa.pending_since';
     public const REMEMBER_KEY = 'tacktack_2fa.remember';
+    public const IMPERSONATION_KEY = 'tacktack_2fa.impersonation';
 
     /** @var SessionInterface */
     protected $session;
@@ -129,5 +130,21 @@ class SessionState
     public function regenerate(): void
     {
         $this->session->migrate(true);
+    }
+
+    /**
+     * Session ouverte par le super utilisateur via « Se connecter en tant que » (§3.3.1). La
+     * marque est liée à l'uID de la cible : une autre identité en session l'ignore.
+     */
+    public function setImpersonation(int $uID, int $origin): void
+    {
+        $this->session->set(self::IMPERSONATION_KEY, ['uID' => $uID, 'origin' => $origin]);
+    }
+
+    public function isImpersonating(int $uID): bool
+    {
+        $value = $this->session->get(self::IMPERSONATION_KEY);
+
+        return is_array($value) && (int) ($value['uID'] ?? 0) === $uID && $uID > 0;
     }
 }

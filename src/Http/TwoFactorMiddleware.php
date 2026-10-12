@@ -5,6 +5,8 @@ namespace TackTack\TwoFactor\Http;
 use Concrete\Core\Application\Application;
 use Concrete\Core\Http\Middleware\DelegateInterface;
 use Concrete\Core\Http\Middleware\MiddlewareInterface;
+use Concrete\Core\Logging\Channels;
+use Concrete\Core\Logging\LoggerFactory;
 use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\Session\SessionValidator;
 use Concrete\Core\User\PostLoginLocation;
@@ -60,11 +62,34 @@ class TwoFactorMiddleware implements MiddlewareInterface
             return $frame->next($request);
         }
 
+        $uID = (int) $user->getUserID();
+        $sessionState = $this->app->make(SessionState::class);
+
+        // Session ouverte par le super utilisateur via « Se connecter en tant que » (§3.3.1) :
+        // aucun contrôle, et aucun état calculé (resolve() peut démarrer un délai de grâce, ce
+        // qu'un passage de support ne doit pas faire à la place de l'utilisateur).
+        if ($sessionState->isImpersonating($uID)) {
+            return $frame->next($request);
+        }
+
         // 4 et 5. État.
         $state = $this->app->make(UserState::class)->resolve($user);
         if ($state === PolicyResolver::PENDING) {
-            $this->app->make(SessionState::class)->touchPendingSince((int) $user->getUserID());
+            $sessionState->touchPendingSince($uID);
         }
+
+        // « Se connecter en tant que » par le super utilisateur déjà vérifié : on observe le
+        // résultat de la requête, on n'arme rien à l'avance (§3.3.1).
+        if ($state === PolicyResolver::VERIFIED && $uID === $this->superUserID()) {
+            $signInAs = SudoRequest::targetFromPath($request->getPathInfo());
+            if ($signInAs !== null) {
+                $response = $frame->next($request);
+                $this->afterSignInAs($uID, $signInAs);
+
+                return $response;
+            }
+        }
+
         if (in_array($state, [PolicyResolver::NOT_REQUIRED, PolicyResolver::VERIFIED, PolicyResolver::GRACE], true)) {
             return $frame->next($request);
         }
@@ -73,7 +98,7 @@ class TwoFactorMiddleware implements MiddlewareInterface
         // qu'on constate l'étape 2FA, y compris sur une page en liste blanche. Ainsi aucun
         // chemin (accès direct à /ccm/2fa/challenge, fermeture du navigateur) ne laisse un
         // cookie capable de reconnecter sans code.
-        $this->app->make(RememberCookie::class)->suspend((int) $user->getUserID());
+        $this->app->make(RememberCookie::class)->suspend($uID);
 
         // 6. Liste blanche.
         if (PathWhitelist::matches($request->getPathInfo())) {
@@ -96,6 +121,36 @@ class TwoFactorMiddleware implements MiddlewareInterface
 
         // 10.
         return new RedirectResponse((string) $target);
+    }
+
+    protected function superUserID(): int
+    {
+        return (int) USER_SUPER_ID;
+    }
+
+    /**
+     * Après la requête « sudo » : si la session est bien devenue celle de la cible, pose la marque
+     * d'exemption et journalise quand un contrôle est réellement sauté. Aucune notification (§3.3.1).
+     */
+    protected function afterSignInAs(int $before, int $target): void
+    {
+        $after = (int) $this->app['session']->get('uID');
+        if (!SudoRequest::isExemptSignIn($this->superUserID(), $before, true, $after, $target)) {
+            return;
+        }
+
+        $this->app->make(SessionState::class)->setImpersonation($after, $before);
+
+        // Lecture seule : pas de resolve(), qui écrirait en base pour la cible.
+        $state = $this->app->make(UserState::class);
+        $credential = $state->getCredential($after);
+        $targetUser = User::getByUserID($after);
+        $skipped = ($credential !== null && $credential->isConfirmed())
+            || ($targetUser && $state->isRequired($targetUser));
+        if ($skipped) {
+            $this->app->make(LoggerFactory::class)->createLogger(Channels::CHANNEL_AUTHENTICATION)
+                ->warning(sprintf('2FA : session ouverte en tant que l\'utilisateur %d par le super utilisateur, étape 2FA sautée.', $after));
+        }
     }
 
     protected function rememberLocation(Request $request): void
