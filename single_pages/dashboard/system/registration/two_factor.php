@@ -20,7 +20,7 @@ $statusLabels = [
     'enroll_required' => t('Must set up'),
 ];
 ?>
-<form method="post" action="<?= $view->action('save_settings') ?>">
+<form method="post" action="<?= h($view->action('save_settings')) ?>">
     <?php $token->output("tacktack_2fa_settings"); ?>
 
     <fieldset>

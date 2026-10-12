@@ -3,6 +3,8 @@
 namespace Concrete\Package\Tacktack2fa\Controller\SinglePage\Dashboard\System\Registration;
 
 use Concrete\Core\Database\Connection\Connection;
+use Concrete\Core\Logging\Channels;
+use Concrete\Core\Logging\LoggerFactory;
 use Concrete\Core\Page\Controller\DashboardPageController;
 use Concrete\Core\Permission\Key\Key as PermissionKey;
 use Concrete\Core\User\User;
@@ -135,6 +137,8 @@ class TwoFactor extends DashboardPageController
         }
         $password = (string) $this->request->request->get('password', '');
         if ($password === '' || !$me->getUserInfoObject()->passwordMatches($password)) {
+            $this->app->make(LoggerFactory::class)->createLogger(Channels::CHANNEL_AUTHENTICATION)
+                ->warning(sprintf('2FA : mot de passe refusé à l\'administrateur %d sur une action du Dashboard (utilisateur visé : %d).', $me->getUserID(), $uID));
             $this->error->add(t('Your password is not valid.'));
 
             return;

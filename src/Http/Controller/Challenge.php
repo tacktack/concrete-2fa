@@ -94,7 +94,7 @@ class Challenge extends Controller
         }
 
         // Succès.
-        $this->app['session']->migrate(true);
+        $this->session->regenerate();
         $this->session->markVerified($uID);
         $this->session->clearPendingSince();
         $this->remember->restore($user);

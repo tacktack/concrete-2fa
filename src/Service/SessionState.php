@@ -121,4 +121,13 @@ class SessionState
     {
         $this->session->remove(self::REMEMBER_KEY);
     }
+
+    /**
+     * Nouvel identifiant de session, en conservant les données : à appeler quand le niveau
+     * d'authentification change (code valide, enrôlement confirmé).
+     */
+    public function regenerate(): void
+    {
+        $this->session->migrate(true);
+    }
 }

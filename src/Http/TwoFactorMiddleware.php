@@ -108,6 +108,9 @@ class TwoFactorMiddleware implements MiddlewareInterface
         if ($location->getSessionPostLoginUrl() !== '') {
             return;
         }
-        $location->setSessionPostLoginUrl($request->getRequestUri());
+        $uri = $request->getRequestUri();
+        if (SafeLocation::isSafe($uri)) {
+            $location->setSessionPostLoginUrl($uri);
+        }
     }
 }

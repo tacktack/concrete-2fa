@@ -145,7 +145,9 @@ class EnrollmentService
             }
         });
 
-        // L'utilisateur vient de fournir un code : la session est vérifiée.
+        // L'utilisateur vient de fournir un code : la session est vérifiée, et son identifiant
+        // change (comme à l'écran de code).
+        $this->session->regenerate();
         $this->session->markVerified($uID);
         $this->session->clearPendingSecret();
 

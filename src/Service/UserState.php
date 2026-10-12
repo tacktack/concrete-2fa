@@ -2,7 +2,6 @@
 
 namespace TackTack\TwoFactor\Service;
 
-use Concrete\Core\Entity\User\User as UserEntity;
 use Concrete\Core\User\User;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,14 +73,16 @@ class UserState
         $enrolled = $credential !== null && $credential->isConfirmed();
         $concerned = $this->isConcerned($user, $credential);
 
-        // Premier constat « concerné et non enrôlé » : le délai de grâce démarre ici.
+        // Premier constat « concerné et non enrôlé » : le délai de grâce démarre ici. Plusieurs
+        // requêtes parallèles peuvent faire ce constat en même temps : l'INSERT tolère le doublon
+        // au lieu de laisser une violation de clé primaire fermer l'EntityManager (erreur 500).
         if ($concerned && !$enrolled && ($credential === null || $credential->getEnforcementStartedAt() === null)) {
+            $this->startEnforcement($uID);
             if ($credential === null) {
-                $credential = new Credential($this->em->getReference(UserEntity::class, $uID));
-                $this->em->persist($credential);
+                $credential = $this->getCredential($uID);
+            } else {
+                $this->em->refresh($credential);
             }
-            $credential->setEnforcementStartedAt(new \DateTime());
-            $this->em->flush();
         }
 
         $started = $credential !== null && $credential->getEnforcementStartedAt() !== null
@@ -95,6 +96,20 @@ class UserState
             $started,
             $this->config->graceDays(),
             $this->session->getVerified()
+        );
+    }
+
+    protected function startEnforcement(int $uID): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $conn = $this->em->getConnection();
+        $conn->executeStatement(
+            'INSERT IGNORE INTO TwoFactorCredentials (uID, failedAttempts, enforcementStartedAt, createdAt, updatedAt) VALUES (:uID, 0, :n1, :n2, :n3)',
+            ['uID' => $uID, 'n1' => $now, 'n2' => $now, 'n3' => $now]
+        );
+        $conn->executeStatement(
+            'UPDATE TwoFactorCredentials SET enforcementStartedAt = :now, updatedAt = :now2 WHERE uID = :uID AND enforcementStartedAt IS NULL AND confirmedAt IS NULL',
+            ['now' => $now, 'now2' => $now, 'uID' => $uID]
         );
     }
 }

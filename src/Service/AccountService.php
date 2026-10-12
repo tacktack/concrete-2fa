@@ -108,6 +108,7 @@ class AccountService
         }
         // Mot de passe d'abord : sans lui, une session détournée ne peut pas tenter de codes.
         if ($password === '' || !$user->getUserInfoObject()->passwordMatches($password)) {
+            $this->log()->warning(sprintf('2FA : mot de passe refusé lors d\'une désactivation (utilisateur %d).', $uID));
             throw new EnrollmentException(t('The password is not valid.'));
         }
         $this->assertCode($uID, $code, true);
@@ -120,7 +121,7 @@ class AccountService
         });
         $this->session->clearVerified();
 
-        $this->log()->warning(sprintf('2FA : désactivée par l\'utilisateur %d.', $uID));
+        $this->log()->notice(sprintf('2FA : désactivée par l\'utilisateur %d.', $uID));
         $this->mail($user, function (string $email, string $site) {
             $this->notifier->disabled($email, $site);
         });

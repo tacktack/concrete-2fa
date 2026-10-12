@@ -146,7 +146,7 @@ class ChallengeService
                 'SELECT COUNT(*) FROM TwoFactorRecoveryCodes WHERE uID = :uID AND usedAt IS NULL',
                 ['uID' => $uID]
             );
-            $this->log()->warning(sprintf('2FA : code de secours utilisé par l\'utilisateur %d (%d restants).', $uID, $this->remainingRecoveryCodes));
+            $this->log()->notice(sprintf('2FA : code de secours utilisé par l\'utilisateur %d (%d restants).', $uID, $this->remainingRecoveryCodes));
 
             return self::OK_RECOVERY;
         }
