@@ -7,8 +7,8 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Un code de secours à usage unique (docs/paquet-2fa.md §3.8, décision #7 — remplace
- * le « mot de passe d'urgence » du paquet marketplace, voir §2.1).
+ * Un code de secours à usage unique (remplace le « mot de passe d'urgence » des
+ * paquets du marketplace).
  *
  * uID est une association ManyToOne, pas une clé primaire partagée comme dans
  * Credential : un utilisateur a plusieurs codes. onDelete="CASCADE" au niveau de la
@@ -42,7 +42,7 @@ class RecoveryCode
     protected $user;
 
     /**
-     * Hachage password_hash() du code (format xxxx-xxxx, §3.8). Le code en clair
+     * Hachage password_hash() du code (format xxxx-xxxx). Le code en clair
      * n'est jamais stocké.
      *
      * @ORM\Column(type="string", length=255)

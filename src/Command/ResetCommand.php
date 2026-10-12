@@ -10,7 +10,7 @@ use TackTack\TwoFactor\Service\ResetService;
 
 /**
  * 2fa:reset <utilisateur>|--all [--force] — supprime secret et codes de secours, lève les
- * verrous (§3.10). Dernier recours quand plus aucun administrateur ne peut se connecter.
+ * verrous. Dernier recours quand plus aucun administrateur ne peut se connecter.
  */
 class ResetCommand extends Command
 {

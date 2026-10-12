@@ -19,7 +19,7 @@ use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
 /**
- * Point de contrôle unique (docs/paquet-2fa.md §2 décisions #1 et #2, §3.3).
+ * Point de contrôle unique.
  *
  * Échec fermé : un utilisateur soumis à la 2FA sans marqueur « vérifié » en session
  * n'accède à rien d'autre que l'écran de code et la déconnexion. Pas de try/catch
@@ -46,8 +46,8 @@ class TwoFactorMiddleware implements MiddlewareInterface
         }
 
         // 2. Reconnexion par le cookie « rester connecté » : sans elle, ce cookie
-        // connecterait l'utilisateur après ce middleware, hors de tout contrôle (§1 constat 2
-        // et 3). Reproduit DefaultDispatcher::getEarlyDispatchResponse().
+        // connecterait l'utilisateur après ce middleware, hors de tout contrôle. Reproduit
+        // DefaultDispatcher::getEarlyDispatchResponse().
         $session = $this->app['session'];
         if (!$session->has('uID')) {
             User::verifyAuthTypeCookie();
@@ -65,7 +65,7 @@ class TwoFactorMiddleware implements MiddlewareInterface
         $uID = (int) $user->getUserID();
         $sessionState = $this->app->make(SessionState::class);
 
-        // Intention notée avant l'action « Se connecter en tant que » (§3.3.1), pilotée par SudoIntent.
+        // Intention notée avant l'action « Se connecter en tant que », pilotée par SudoIntent.
         $intent = $sessionState->peekSudoPending();
         switch (SudoIntent::evaluate($intent, $uID, time(), $this->superUserID())) {
             case SudoIntent::CLEAR:
@@ -78,7 +78,7 @@ class TwoFactorMiddleware implements MiddlewareInterface
                 return $frame->next($request);
         }
 
-        // Session ouverte par le super utilisateur via « Se connecter en tant que » (§3.3.1) :
+        // Session ouverte par le super utilisateur via « Se connecter en tant que » :
         // aucun contrôle, et aucun état calculé (resolve() peut démarrer un délai de grâce, ce
         // qu'un passage de support ne doit pas faire à la place de l'utilisateur).
         if ($sessionState->isImpersonating($uID)) {
@@ -152,7 +152,7 @@ class TwoFactorMiddleware implements MiddlewareInterface
 
     /**
      * Pose la marque d'exemption et journalise quand un contrôle est réellement sauté. Aucune
-     * notification (§3.3.1).
+     * notification.
      */
     protected function grantImpersonation(int $target, int $origin): void
     {

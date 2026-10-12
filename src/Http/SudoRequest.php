@@ -3,8 +3,8 @@
 namespace TackTack\TwoFactor\Http;
 
 /**
- * Décision pure de l'exemption « Se connecter en tant que » du super utilisateur
- * (docs/paquet-2fa.md §2 décision #16, §3.3.1), sans dépendance à Concrete pour rester testable.
+ * Décision pure de l'exemption « Se connecter en tant que » du super utilisateur,
+ * sans dépendance à Concrete pour rester testable.
  */
 class SudoRequest
 {
@@ -33,7 +33,7 @@ class SudoRequest
     }
 
     /**
-     * Conditions du §3.3.1 vérifiées à la confirmation : l'intention vient du super utilisateur et la
+     * Conditions vérifiées à la confirmation : l'intention vient du super utilisateur et la
      * session est devenue celle de la cible demandée (un autre utilisateur). L'état « verified » du
      * super utilisateur et le jeton CSRF sont contrôlés à l'armement (SudoIntent::shouldArm), seul
      * moment où ils ont un sens ; l'intention ne naît pas autrement.

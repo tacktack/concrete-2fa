@@ -8,8 +8,8 @@ use TackTack\TwoFactor\Service\OverviewService;
 use TackTack\TwoFactor\Service\SecretCipher;
 
 /**
- * 2fa:status [utilisateur] — état de la 2FA (§3.10). Sort avec un code non nul si la clé de
- * chiffrement est absente ou invalide : le workflow de déploiement s'en sert (§4).
+ * 2fa:status [utilisateur] — état de la 2FA. Sort avec un code non nul si la clé de
+ * chiffrement est absente ou invalide : le workflow de déploiement s'en sert.
  */
 class StatusCommand extends Command
 {

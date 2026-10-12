@@ -14,9 +14,9 @@ use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
 /**
- * /ccm/2fa/enroll — enrôlement forcé (docs/paquet-2fa.md §3.5).
+ * /ccm/2fa/enroll — enrôlement forcé.
  *
- * Règle générale du §3.3 : la liste blanche du middleware ouvre /ccm/2fa/* à tous les
+ * Règle générale : la liste blanche du middleware ouvre /ccm/2fa/* à tous les
  * états, donc ce contrôleur recalcule l'état en GET comme en POST, avant toute autre
  * action, et n'accepte que « enroll_required ».
  */
@@ -89,7 +89,7 @@ class Enrollment extends Controller
             return $this->to('/login');
         }
 
-        // Session ouverte par le super utilisateur (§3.3.1) : rien à vérifier ni à enrôler ici.
+        // Session ouverte par le super utilisateur : rien à vérifier ni à enrôler ici.
         if ($this->sessionState()->isImpersonating((int) $user->getUserID())) {
             return $this->to('/');
         }

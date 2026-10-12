@@ -13,7 +13,7 @@ use Concrete\Package\Tacktack2fa\Controller as PackageController;
 use TackTack\TwoFactor\Entity\Credential;
 
 /**
- * Vérification du code de l'écran de challenge (docs/paquet-2fa.md §3.4, étapes 3 à 5).
+ * Vérification du code de l'écran de challenge : verrou, bannissement IP, puis TOTP ou code de secours.
  *
  * Les écritures qui protègent contre le rejeu (pas de temps, code de secours) et le
  * compteur d'échecs sont des UPDATE conditionnels ou atomiques en SQL : deux requêtes
@@ -103,7 +103,7 @@ class ChallengeService
         try {
             $secret = $this->cipher->decrypt((string) $credential->getSecret());
         } catch (\RuntimeException $e) {
-            // Décision #12 : clé absente ou invalide → TOTP refusé (échec fermé), journalisé.
+            // Clé absente ou invalide → TOTP refusé (échec fermé), journalisé.
             // Les codes de secours restent utilisables.
             $this->log()->warning('2FA : secret illisible (clé de chiffrement absente, invalide ou changée) pour l\'utilisateur ' . $credential->getUserID() . '.');
 

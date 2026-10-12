@@ -6,7 +6,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Liste des utilisateurs concernés par la 2FA et leur statut (docs/paquet-2fa.md §3.7),
+ * Liste des utilisateurs concernés par la 2FA et leur statut,
  * partagée par le Dashboard et la commande 2fa:status.
  */
 class OverviewService

@@ -15,7 +15,7 @@ use TackTack\TwoFactor\Service\SessionState;
 use TackTack\TwoFactor\Service\UserState;
 
 /**
- * /ccm/2fa/challenge — écran de code (docs/paquet-2fa.md §3.4).
+ * /ccm/2fa/challenge — écran de code.
  *
  * Ordre figé du POST : jeton CSRF, état « pending », délai de 5 minutes, verrou / IP,
  * vérification. Les messages d'erreur ne disent jamais si c'est le code, le verrou ou la
@@ -112,7 +112,7 @@ class Challenge extends Controller
     }
 
     /**
-     * Règle générale du §3.3 : l'état est recalculé ici, en GET comme en POST.
+     * Règle générale : l'état est recalculé ici, en GET comme en POST.
      *
      * @return Response|null une redirection si l'état n'est pas « pending »
      */
@@ -123,7 +123,7 @@ class Challenge extends Controller
             return $this->to('/login');
         }
 
-        // Session ouverte par le super utilisateur (§3.3.1) : rien à vérifier ni à enrôler ici.
+        // Session ouverte par le super utilisateur : rien à vérifier ni à enrôler ici.
         if ($this->sessionState()->isImpersonating((int) $user->getUserID())) {
             return $this->to('/');
         }
@@ -146,7 +146,7 @@ class Challenge extends Controller
 
     protected function showForm(?string $error): Response
     {
-        // « Utiliser un code de secours » (§3.4) : même formulaire, saisie texte au lieu du pavé
+        // « Utiliser un code de secours » : même formulaire, saisie texte au lieu du pavé
         // numérique. Le serveur reconnaît le type de code à sa forme, pas à cette variante.
         $recovery = (bool) $this->request->query->get('recovery');
         $challengeUrl = (string) $this->app->make('url/manager')->resolve(['/ccm/2fa/challenge']);
@@ -165,9 +165,9 @@ class Challenge extends Controller
 
     /**
      * Déconnexion puis redirection. Les messages flash ne sont pas rendus de façon fiable par
-     * tous les thèmes : le délai expiré passe par /login/session_invalidated, dont le message est rendu par le cœur ;
-     * le verrou reste silencieux (message générique, §3.4) et l'écran de code le redit à la
-     * reconnexion.
+     * tous les thèmes : le délai expiré passe par /login/session_invalidated, dont le message
+     * est rendu par le cœur ; le verrou reste silencieux (message générique) et l'écran de code
+     * le redit à la reconnexion.
      */
     protected function logoutTo(string $path): Response
     {

@@ -6,8 +6,7 @@ use Concrete\Core\User\PersistentAuthentication\CookieService;
 use Concrete\Core\User\User;
 
 /**
- * Cookie « rester connecté » pendant l'étape 2FA (docs/paquet-2fa.md §2 décision #3,
- * §3.3 étape 7).
+ * Cookie « rester connecté » pendant l'étape 2FA.
  *
  * Concrete pose ce cookie dès la vérification du mot de passe, avant toute étape 2FA. Tant
  * qu'il existe, il reconnecte l'utilisateur sans mot de passe ni code. Il est donc supprimé

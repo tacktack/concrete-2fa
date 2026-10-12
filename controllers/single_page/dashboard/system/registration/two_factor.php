@@ -16,7 +16,7 @@ use TackTack\TwoFactor\Service\ResetService;
 
 /**
  * /dashboard/system/registration/two_factor — réglages de la politique, liste des utilisateurs
- * concernés, réinitialisation et levée de verrou (docs/paquet-2fa.md §3.7).
+ * concernés, réinitialisation et levée de verrou.
  *
  * Réinitialiser et lever un verrou exigent : la permission de tâche « tacktack_2fa_reset »,
  * un POST avec jeton CSRF, la ressaisie du mot de passe de l'administrateur, et un compte

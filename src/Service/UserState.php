@@ -9,8 +9,8 @@ use TackTack\TwoFactor\Entity\Credential;
 
 /**
  * Collecte les entrées de PolicyResolver pour l'utilisateur courant et en tire l'état
- * 2FA (docs/paquet-2fa.md §3.2). C'est la source unique de l'état : le middleware
- * (étape 4) et chaque contrôleur /ccm/2fa/* passent par ici.
+ * 2FA. C'est la source unique de l'état : le middleware
+ * et chaque contrôleur /ccm/2fa/* passent par ici.
  */
 class UserState
 {
@@ -40,8 +40,7 @@ class UserState
     }
 
     /**
-     * Concerné = super utilisateur (uID 1), membre d'un groupe obligatoire, ou déjà enrôlé
-     * (décision #10).
+     * Concerné = super utilisateur (uID 1), membre d'un groupe obligatoire, ou déjà enrôlé.
      */
     public function isConcerned(User $user, ?Credential $credential): bool
     {
@@ -54,7 +53,7 @@ class UserState
 
     /**
      * Imposé par la politique (super utilisateur ou groupe obligatoire), indépendamment d'un
-     * enrôlement volontaire. Seuls les utilisateurs non imposés peuvent désactiver leur 2FA (§3.6).
+     * enrôlement volontaire. Seuls les utilisateurs non imposés peuvent désactiver leur 2FA.
      */
     public function isRequired(User $user): bool
     {

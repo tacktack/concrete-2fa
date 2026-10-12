@@ -8,7 +8,7 @@ use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 
 /**
- * QR code généré côté serveur, en SVG inline (docs/paquet-2fa.md §2 décision #8) :
+ * QR code généré côté serveur, en SVG inline :
  * le secret ne part jamais vers un service tiers.
  */
 class QrCodeService

@@ -9,12 +9,10 @@ use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 
 /**
- * Chiffrement au repos du secret TOTP, avec defuse/php-encryption
- * (docs/paquet-2fa.md §2 décision #6, §2 décision #12).
+ * Chiffrement au repos du secret TOTP, avec defuse/php-encryption.
  *
  * La clé vit dans la variable d'environnement TWOFA_ENCRYPTION_KEY, jamais en base.
- * Ni cette classe ni aucun appelant ne doit journaliser la clé ou un secret en clair
- * (voir §3.9).
+ * Ni cette classe ni aucun appelant ne doit journaliser la clé ou un secret en clair.
  */
 class SecretCipher
 {
@@ -48,7 +46,7 @@ class SecretCipher
 
     /**
      * true si TWOFA_ENCRYPTION_KEY est présente et lisible comme clé defuse valide,
-     * sans lancer d'exception. Utilisé par install() (décision #12) et par la
+     * sans lancer d'exception. Utilisé par install() et par la
      * commande 2fa:status.
      */
     public function isKeyConfigured(): bool
@@ -64,7 +62,7 @@ class SecretCipher
 
     /**
      * Génère une nouvelle clé au format ASCII sûr, à placer dans TWOFA_ENCRYPTION_KEY.
-     * Utilisé par la commande 2fa:generate-key (§3.10).
+     * Utilisé par la commande 2fa:generate-key.
      */
     public function generateKey(): string
     {

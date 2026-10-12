@@ -5,7 +5,7 @@ namespace TackTack\TwoFactor\Service;
 use DateTimeImmutable;
 
 /**
- * Limitation des tentatives par utilisateur (docs/paquet-2fa.md §2 décision #9) :
+ * Limitation des tentatives par utilisateur :
  * 5 échecs → verrou de 15 min. La partie IP (20 échecs / 10 min → bannissement 1 h) est
  * portée par la catégorie IpAccessControlCategory créée à l'installation ; le contrôleur
  * y enregistre chaque échec via IpAccessControlService.

@@ -5,8 +5,7 @@ namespace TackTack\TwoFactor\Service;
 use PragmaRX\Google2FA\Google2FA;
 
 /**
- * TOTP RFC 6238 : SHA-1, 6 chiffres, pas de 30 s, tolérance ±1 pas
- * (docs/paquet-2fa.md §2 décisions #4 et #5).
+ * TOTP RFC 6238 : SHA-1, 6 chiffres, pas de 30 s, tolérance ±1 pas, rejeu refusé.
  *
  * La comparaison des codes est faite par google2fa avec hash_equals (temps constant).
  */
@@ -84,7 +83,7 @@ class TotpService
     }
 
     /**
-     * URI otpauth:// du QR code (§3.5). Issuer et compte sont encodés.
+     * URI otpauth:// du QR code. Issuer et compte sont encodés.
      */
     public function provisioningUri(string $issuer, string $account, string $secret): string
     {

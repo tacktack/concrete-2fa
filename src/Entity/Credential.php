@@ -7,8 +7,7 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Une ligne par utilisateur enrôlé ou concerné par la politique 2FA
- * (docs/paquet-2fa.md §3.8, décision figée #11).
+ * Une ligne par utilisateur enrôlé ou concerné par la politique 2FA.
  *
  * uID sert à la fois de clé primaire et de clé étrangère vers Users.uID (association
  * "clé primaire partagée") : onDelete="CASCADE" au niveau de la base fait que la ligne
@@ -32,7 +31,7 @@ class Credential
 
     /**
      * Secret TOTP chiffré (defuse). Null tant que l'utilisateur n'a pas confirmé
-     * son enrôlement (décision #12 : jamais en clair en base).
+     * son enrôlement (jamais en clair en base).
      *
      * @ORM\Column(type="text", nullable=true)
      *
@@ -41,7 +40,7 @@ class Credential
     protected $secret;
 
     /**
-     * Non null = enrôlement confirmé (état "pending"/"verified" du §3.2).
+     * Non null = enrôlement confirmé (état "pending"/"verified").
      *
      * @ORM\Column(type="datetime", nullable=true)
      *
@@ -50,8 +49,7 @@ class Credential
     protected $confirmedAt;
 
     /**
-     * Dernier pas de temps TOTP accepté, pour la protection contre le rejeu
-     * (décision #5).
+     * Dernier pas de temps TOTP accepté, pour la protection contre le rejeu.
      *
      * @ORM\Column(type="bigint", nullable=true)
      *
@@ -74,7 +72,7 @@ class Credential
     protected $lockedUntil;
 
     /**
-     * Début du délai de grâce (§3.2). Remis à null par une réinitialisation
+     * Début du délai de grâce. Remis à null par une réinitialisation
      * administrateur, pour exiger l'enrôlement dès la connexion suivante.
      *
      * @ORM\Column(type="datetime", nullable=true)

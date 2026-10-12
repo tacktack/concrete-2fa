@@ -3,7 +3,7 @@
 namespace TackTack\TwoFactor\Http;
 
 /**
- * Cycle de vie de l'intention « Se connecter en tant que » (docs/paquet-2fa.md §3.3.1), sans
+ * Cycle de vie de l'intention « Se connecter en tant que », sans
  * dépendance à Concrete pour rester testable.
  *
  * Le cœur termine l'action sudo par exit : le middleware note l'intention AVANT l'action, puis la

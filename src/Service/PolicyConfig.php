@@ -5,7 +5,7 @@ namespace TackTack\TwoFactor\Service;
 use Concrete\Core\Config\Repository\Repository;
 
 /**
- * Lecture de la politique (docs/paquet-2fa.md §3.7) : les valeurs enregistrées au Dashboard
+ * Lecture de la politique : les valeurs enregistrées au Dashboard
  * (dépôt « config/database ») l'emportent ; à défaut, config/policy.php.
  *
  * Le dépôt « config » n'est pas utilisable seul : il ne relit pas la base pour l'espace de

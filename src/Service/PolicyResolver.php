@@ -5,7 +5,7 @@ namespace TackTack\TwoFactor\Service;
 use DateTimeImmutable;
 
 /**
- * Calcule l'état 2FA d'un utilisateur (docs/paquet-2fa.md §3.2).
+ * Calcule l'état 2FA d'un utilisateur.
  *
  * Fonction pure : toutes les données nécessaires sont passées en arguments, pour que les
  * cinq états soient testables sans Concrete. Les appelants (middleware, contrôleurs)
@@ -44,7 +44,7 @@ class PolicyResolver
         }
 
         // Un marqueur posé pour un autre uID vaut « non vérifié » : c'est ce qui rend
-        // « Se connecter en tant que » fermé par construction (décision #16).
+        // « Se connecter en tant que » fermé par construction.
         if ($enrolled && is_array($sessionMarker) && (int) ($sessionMarker['uID'] ?? 0) === $uID) {
             return self::VERIFIED;
         }

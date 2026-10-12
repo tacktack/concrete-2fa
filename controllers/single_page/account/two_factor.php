@@ -13,7 +13,7 @@ use TackTack\TwoFactor\Service\UserState;
 
 /**
  * /account/two_factor — activation volontaire, statut, régénération des codes de secours et
- * désactivation (docs/paquet-2fa.md §3.5, §3.6).
+ * désactivation.
  *
  * Chaque action est un POST avec son propre jeton CSRF. EnrollmentService refuse tout
  * utilisateur déjà enrôlé : cette page ne peut jamais remplacer un secret existant. Les
@@ -134,7 +134,7 @@ class TwoFactor extends AccountPageController
     {
         $user = $this->app->make(User::class);
 
-        // Session ouverte par le super utilisateur (§3.3.1) : la 2FA de la cible ne se consulte
+        // Session ouverte par le super utilisateur : la 2FA de la cible ne se consulte
         // ni ne se modifie ici.
         if ($this->isImpersonating()) {
             $this->set('mode', 'impersonation');

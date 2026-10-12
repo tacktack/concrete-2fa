@@ -31,14 +31,14 @@ class Controller extends Package
 {
     /**
      * Handle de la catégorie de contrôle d'accès IP créée par ce paquet
-     * (§2 décision #9 : 20 échecs / 10 min → bannissement 1 h). Visible au Dashboard
+     * (20 échecs / 10 min → bannissement 1 h). Visible au Dashboard
      * dans l'écran natif des contrôles d'accès IP du cœur.
      */
     const IP_CATEGORY_HANDLE = 'tacktack_2fa_failed_code';
 
     /**
      * Permission de tâche exigée pour réinitialiser la 2FA d'un autre utilisateur ou
-     * lever un verrou depuis le Dashboard (§3.7). Accordée aux Administrateurs par
+     * lever un verrou depuis le Dashboard. Accordée aux Administrateurs par
      * défaut à l'installation ; réattribuable comme toute permission de tâche.
      */
     const RESET_PERMISSION_HANDLE = 'tacktack_2fa_reset';
@@ -94,7 +94,7 @@ class Controller extends Package
         $this->registerCommands();
 
         // Point de contrôle HTTP. Priorité 20 : à l'intérieur de CookieMiddleware (10), pour
-        // que les cookies mis en file par la suite soient appliqués à la réponse (§3.3).
+        // que les cookies mis en file par la suite soient appliqués à la réponse.
         if (!$this->app->isRunThroughCommandLineInterface()) {
             $this->app->make(ServerInterface::class)->addMiddleware(
                 new TwoFactorMiddleware($this->app),
@@ -104,7 +104,7 @@ class Controller extends Package
     }
 
     /**
-     * Commandes 2fa:* (§3.10), enregistrées seulement en ligne de commande. Le conteneur
+     * Commandes 2fa:*, enregistrées seulement en ligne de commande. Le conteneur
      * « console » n'existe pas encore pendant on_start : on attend l'événement du cœur.
      */
     protected function registerCommands()
@@ -138,8 +138,7 @@ class Controller extends Package
      * Autoload des dépendances tierces si le paquet est distribué avec son propre
      * vendor/ (installation hors Composer). Sans effet quand Composer résout déjà
      * pragmarx/google2fa, bacon/bacon-qr-code et defuse/php-encryption dans le
-     * vendor/ racine du site — c'est le cas normal pour ce paquet (docs/paquet-2fa.md
-     * §3.11, §4).
+     * vendor/ racine du site — c'est le cas normal pour ce paquet.
      */
     protected function registerAutoload()
     {
@@ -160,7 +159,7 @@ class Controller extends Package
      */
     public function install()
     {
-        // §2 décision #12 : échec fermé si la clé de chiffrement est absente ou
+        // Échec fermé si la clé de chiffrement est absente ou
         // invalide, AVANT toute écriture — parent::install() n'est pas encore
         // appelé, donc aucune ligne Packages n'est créée et l'installation peut être
         // retentée proprement une fois la clé en place.
@@ -178,8 +177,8 @@ class Controller extends Package
     public function upgrade()
     {
         // Pas de vérification de clé ici (contrairement à install()) : la garder à
-        // jour est la responsabilité du contrôle explicite ajouté à l'étape 9 dans le
-        // workflow de déploiement (docs/paquet-2fa.md §4), pas de ce code, pour ne
+        // jour est la responsabilité du contrôle explicite ajouté dans le
+        // workflow de déploiement, pas de ce code, pour ne
         // pas bloquer une mise à niveau du paquet lui-même si le déploiement échoue
         // pour une autre raison avant d'atteindre cette étape.
         parent::upgrade();
@@ -222,7 +221,7 @@ class Controller extends Package
     }
 
     /**
-     * Catégorie IP dédiée aux échecs de code 2FA (§2 décision #9). Idempotent :
+     * Catégorie IP dédiée aux échecs de code 2FA. Idempotent :
      * appelée à la fois par install() et upgrade().
      */
     protected function installFailedCodeIpCategory(PackageEntity $pkg): void
@@ -250,7 +249,7 @@ class Controller extends Package
 
     /**
      * Permission de tâche « tacktack_2fa_reset », accordée aux Administrateurs par
-     * défaut (§3.7). Idempotent.
+     * défaut. Idempotent.
      */
     protected function installResetPermission(PackageEntity $pkg): void
     {

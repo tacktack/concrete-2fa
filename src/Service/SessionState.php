@@ -5,7 +5,7 @@ namespace TackTack\TwoFactor\Service;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
- * Lecture/écriture des clés de session du paquet (docs/paquet-2fa.md §3.2, §3.5).
+ * Lecture/écriture des clés de session du paquet.
  *
  * Les deux valeurs sont liées à un uID : une valeur posée pour un autre utilisateur
  * (« Se connecter en tant que ») est ignorée.
@@ -73,7 +73,7 @@ class SessionState
 
     /**
      * Début de l'étape 2FA (état « pending »), posé une seule fois par le middleware :
-     * un simple rafraîchissement ne remet pas le délai de 5 minutes à zéro (§3.4).
+     * un simple rafraîchissement ne remet pas le délai de 5 minutes à zéro.
      * Un marqueur absent ou posé pour un autre uID compte comme expiré.
      */
     public function touchPendingSince(int $uID): void
@@ -101,8 +101,8 @@ class SessionState
     }
 
     /**
-     * Type d'authentification du cookie « rester connecté » mis de côté pendant l'étape 2FA
-     * (§3.3 étape 7), à reposer après un code valide.
+     * Type d'authentification du cookie « rester connecté » mis de côté pendant l'étape 2FA,
+     * à reposer après un code valide.
      */
     public function getRememberHandle(int $uID): ?string
     {
@@ -134,7 +134,7 @@ class SessionState
     }
 
     /**
-     * Session ouverte par le super utilisateur via « Se connecter en tant que » (§3.3.1). La
+     * Session ouverte par le super utilisateur via « Se connecter en tant que ». La
      * marque est liée à l'uID de la cible : une autre identité en session l'ignore.
      */
     public function setImpersonation(int $uID, int $origin): void

@@ -14,7 +14,7 @@ use TackTack\TwoFactor\Entity\RecoveryCode;
 
 /**
  * Réinitialisation de la 2FA d'un utilisateur et levée de verrou, par un administrateur ou
- * en ligne de commande (docs/paquet-2fa.md §3.7, §3.10). Les garde-fous (permission, jeton
+ * en ligne de commande. Les garde-fous (permission, jeton
  * CSRF, mot de passe de l'administrateur, compte propre) sont à la charge de l'appelant
  * web ; la ligne de commande n'en a pas (l'accès au serveur est hors du modèle de menace).
  */
@@ -22,7 +22,7 @@ class ResetService
 {
     /**
      * Début de grâce « déjà écoulé » : après une réinitialisation, un utilisateur imposé par
-     * la politique doit s'enrôler dès la connexion suivante (§3.2).
+     * la politique doit s'enrôler dès la connexion suivante.
      */
     public const GRACE_EXPIRED = '2000-01-01 00:00:00';
 

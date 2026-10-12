@@ -3,7 +3,7 @@
 namespace TackTack\TwoFactor\Service;
 
 /**
- * Logique pure des codes de secours (docs/paquet-2fa.md §2 décision #7, §3.8) :
+ * Logique pure des codes de secours :
  * génération, normalisation, hachage, vérification. La persistance (entités
  * RecoveryCode) est faite par les contrôleurs, qui marquent le code utilisé.
  */

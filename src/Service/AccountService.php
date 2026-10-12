@@ -12,7 +12,7 @@ use TackTack\TwoFactor\Entity\Credential;
 use TackTack\TwoFactor\Entity\RecoveryCode;
 
 /**
- * Actions de la page /account/two_factor sur un compte déjà enrôlé (docs/paquet-2fa.md §3.6).
+ * Actions de la page /account/two_factor sur un compte déjà enrôlé.
  * L'appelant vérifie le jeton CSRF propre à l'action et l'état « verified ».
  */
 class AccountService
@@ -133,7 +133,7 @@ class AccountService
     {
         $result = $this->challenge->attempt($uID, $code, $allowRecovery);
         if ($result !== ChallengeService::OK && $result !== ChallengeService::OK_RECOVERY) {
-            // Message générique : ni le verrou ni la configuration ne sont révélés (§3.4).
+            // Message générique : ni le verrou ni la configuration ne sont révélés.
             throw new EnrollmentException(t('The code is not valid, or verification is temporarily unavailable.'));
         }
     }
@@ -157,7 +157,7 @@ class AccountService
 
     /**
      * Pendant une session ouverte par le super utilisateur (« Se connecter en tant que »), la 2FA
-     * de la cible ne se modifie pas : sinon on pourrait y enrôler son propre appareil (§3.3.1).
+     * de la cible ne se modifie pas : sinon on pourrait y enrôler son propre appareil.
      *
      * @throws EnrollmentException
      */

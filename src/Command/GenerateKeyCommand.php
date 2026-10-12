@@ -6,7 +6,7 @@ use Concrete\Core\Console\Command;
 use TackTack\TwoFactor\Service\SecretCipher;
 
 /**
- * 2fa:generate-key — affiche une clé neuve à placer dans TWOFA_ENCRYPTION_KEY (§3.10).
+ * 2fa:generate-key — affiche une clé neuve à placer dans TWOFA_ENCRYPTION_KEY.
  */
 class GenerateKeyCommand extends Command
 {

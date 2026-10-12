@@ -8,7 +8,7 @@ namespace TackTack\TwoFactor\Http;
 class PathWhitelist
 {
     /**
-     * Liste blanche (§3.3, étape 6), comparée sur le chemin décodé une seule fois. Un chemin
+     * Liste blanche, comparée sur le chemin décodé une seule fois. Un chemin
      * suspect (« .. », « // », un « % » restant, un caractère de contrôle) n'est jamais en
      * liste blanche. Le décodage est nécessaire : le jeton CSRF du lien de déconnexion
      * contient « : », transmis en « %3A ».

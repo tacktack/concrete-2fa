@@ -7,7 +7,7 @@ use Concrete\Core\Logging\Channels;
 use Concrete\Core\Logging\LoggerFactory;
 
 /**
- * E-mails de sécurité (docs/paquet-2fa.md §3.9). Un échec d'envoi est journalisé et ne
+ * E-mails de sécurité. Un échec d'envoi est journalisé et ne
  * bloque jamais l'action.
  */
 class Notifier

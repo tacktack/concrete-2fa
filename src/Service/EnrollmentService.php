@@ -13,7 +13,7 @@ use TackTack\TwoFactor\Entity\RecoveryCode;
 
 /**
  * Enrôlement TOTP, partagé par /ccm/2fa/enroll (forcé) et /account/two_factor
- * (volontaire) — docs/paquet-2fa.md §3.5. L'appelant vérifie l'état et le jeton CSRF ;
+ * (volontaire). L'appelant vérifie l'état et le jeton CSRF ;
  * ce service refuse en plus de toucher à un utilisateur déjà enrôlé, quel que soit
  * l'appelant (le secret existant ne doit jamais être remplaçable en v1).
  */
@@ -132,7 +132,7 @@ class EnrollmentService
             $credential
                 ->setSecret($this->cipher->encrypt($secret))
                 ->setConfirmedAt(new \DateTime())
-                // Le code d'enrôlement ne doit pas pouvoir resservir dans sa fenêtre (décision #5).
+                // Le code d'enrôlement ne doit pas pouvoir resservir dans sa fenêtre.
                 ->setLastTimestep($step)
                 ->setFailedAttempts(0)
                 ->setLockedUntil(null);
@@ -165,7 +165,7 @@ class EnrollmentService
 
     /**
      * Pendant une session ouverte par le super utilisateur (« Se connecter en tant que »), la 2FA
-     * de la cible ne se modifie pas : sinon on pourrait y enrôler son propre appareil (§3.3.1).
+     * de la cible ne se modifie pas : sinon on pourrait y enrôler son propre appareil.
      *
      * @throws EnrollmentException
      */
