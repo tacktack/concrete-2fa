@@ -40,26 +40,23 @@ it('décode une seule fois : le chemin décodé est celui qui compte, le double 
     expect(SudoRequest::targetFromPath('/dashboard%252Fusers/search/update_status/sudo/7'))->toBeNull();
 });
 
-it('exige les trois conditions du §3.3.1', function () {
-    // uID 1 vérifié, la session devient la cible demandée
-    expect(SudoRequest::isExemptSignIn(1, 1, true, 7, 7))->toBeTrue();
-    // un autre administrateur n'est pas exempté
-    expect(SudoRequest::isExemptSignIn(1, 3, true, 7, 7))->toBeFalse();
-    // le super utilisateur non vérifié (grâce, pas de code) n'est pas exempté
-    expect(SudoRequest::isExemptSignIn(1, 1, false, 7, 7))->toBeFalse();
-    // la session n'a pas changé (jeton refusé, permission absente)
-    expect(SudoRequest::isExemptSignIn(1, 1, true, 1, 7))->toBeFalse();
-    // la session est devenue quelqu'un d'autre que la cible du chemin
-    expect(SudoRequest::isExemptSignIn(1, 1, true, 8, 7))->toBeFalse();
-    // la requête n'était pas l'action sudo
-    expect(SudoRequest::isExemptSignIn(1, 1, true, 7, null))->toBeFalse();
-    // pas d'utilisateur après la requête
-    expect(SudoRequest::isExemptSignIn(1, 1, true, 0, 0))->toBeFalse();
+it('confirme seulement une intention du super utilisateur vers la cible demandée', function () {
+    // origine = super utilisateur, la session est devenue la cible demandée
+    expect(SudoRequest::isExemptSignIn(1, 1, 7, 7))->toBeTrue();
+    // l'origine n'est pas le super utilisateur
+    expect(SudoRequest::isExemptSignIn(1, 3, 7, 7))->toBeFalse();
+    // la session n'a pas changé
+    expect(SudoRequest::isExemptSignIn(1, 1, 1, 7))->toBeFalse();
+    // la session est devenue quelqu'un d'autre que la cible demandée
+    expect(SudoRequest::isExemptSignIn(1, 1, 8, 7))->toBeFalse();
+    // pas de cible, pas d'utilisateur
+    expect(SudoRequest::isExemptSignIn(1, 1, 7, null))->toBeFalse();
+    expect(SudoRequest::isExemptSignIn(1, 1, 0, 0))->toBeFalse();
 });
 
-it('l\'intention notée avant la requête expire', function () {
-    expect(SudoRequest::isFresh(1000, 1000))->toBeTrue();
-    expect(SudoRequest::isFresh(1000, 1120))->toBeTrue();
-    expect(SudoRequest::isFresh(1000, 1121))->toBeFalse();
-    expect(SudoRequest::isFresh(1000, 999))->toBeFalse();
+it('isFresh borne la durée de l\'intention', function () {
+    expect(SudoRequest::isFresh(1000, 1000, 30))->toBeTrue();
+    expect(SudoRequest::isFresh(1000, 1030, 30))->toBeTrue();
+    expect(SudoRequest::isFresh(1000, 1031, 30))->toBeFalse();
+    expect(SudoRequest::isFresh(1000, 999, 30))->toBeFalse();
 });

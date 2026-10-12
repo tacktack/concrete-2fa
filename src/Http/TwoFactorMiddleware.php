@@ -65,22 +65,17 @@ class TwoFactorMiddleware implements MiddlewareInterface
         $uID = (int) $user->getUserID();
         $sessionState = $this->app->make(SessionState::class);
 
-        // Intention notée avant l'action « Se connecter en tant que » (§3.3.1). Tant que la session
-        // est encore celle de l'origine (requête concurrente, action échouée), on la garde jusqu'à
-        // expiration ; dès que la session appartient à un autre utilisateur, elle est lue et effacée :
-        // elle ne sert qu'une fois, et ne vaut que si cet utilisateur est la cible demandée.
-        $pending = $sessionState->peekSudoPending();
-        if ($pending !== null) {
-            if (!SudoRequest::isFresh($pending['at'], time())) {
+        // Intention notée avant l'action « Se connecter en tant que » (§3.3.1), pilotée par SudoIntent.
+        $intent = $sessionState->peekSudoPending();
+        switch (SudoIntent::evaluate($intent, $uID, time(), $this->superUserID())) {
+            case SudoIntent::CLEAR:
                 $sessionState->clearSudoPending();
-            } elseif ($uID !== $pending['origin']) {
+                break;
+            case SudoIntent::GRANT:
                 $sessionState->clearSudoPending();
-                if (SudoRequest::isExemptSignIn($this->superUserID(), $pending['origin'], true, $uID, $pending['target'])) {
-                    $this->grantImpersonation($uID, $pending['origin']);
+                $this->grantImpersonation($uID, (int) $intent['origin']);
 
-                    return $frame->next($request);
-                }
-            }
+                return $frame->next($request);
         }
 
         // Session ouverte par le super utilisateur via « Se connecter en tant que » (§3.3.1) :
@@ -97,12 +92,13 @@ class TwoFactorMiddleware implements MiddlewareInterface
         }
 
         // Le super utilisateur déjà vérifié lance l'action « Se connecter en tant que » : on note
-        // l'intention avant la requête. Elle ne vaut rien tant que la session n'a pas basculé
-        // vers la cible (voir plus haut) ; une requête qui échoue la laisse sans effet.
+        // l'intention avant la requête, mais seulement pour un POST portant un jeton CSRF valide
+        // (le cœur exécutera alors l'action). Un GET venu d'ailleurs, une requête au jeton refusé ou
+        // une simple prélecture du navigateur n'arment rien.
         if ($state === PolicyResolver::VERIFIED && $uID === $this->superUserID()) {
             $signInAs = SudoRequest::targetFromPath($request->getPathInfo());
-            if ($signInAs !== null) {
-                $sessionState->armSudo($uID, $signInAs);
+            if (SudoIntent::shouldArm($request->getMethod(), $signInAs, $uID, $this->superUserID(), true, $this->hasValidToken($request))) {
+                $sessionState->armSudo($uID, (int) $signInAs);
             }
         }
 
@@ -137,6 +133,16 @@ class TwoFactorMiddleware implements MiddlewareInterface
 
         // 10.
         return new RedirectResponse((string) $target);
+    }
+
+    /**
+     * Jeton CSRF du cœur (action par défaut, comme l'action sudo) valide pour cette session.
+     */
+    protected function hasValidToken(Request $request): bool
+    {
+        $token = $request->request->get('ccm_token');
+
+        return is_string($token) && $token !== '' && $this->app->make('token')->validate('', $token);
     }
 
     protected function superUserID(): int

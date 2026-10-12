@@ -33,28 +33,21 @@ class SudoRequest
     }
 
     /**
-     * Les trois conditions du §3.3.1, toutes nécessaires :
-     *  1. la requête visait l'action « sudo » pour l'uID $target ;
-     *  2. avant elle, la session était celle du super utilisateur, déjà vérifiée ;
-     *  3. après elle, la session est devenue celle de $target (un autre utilisateur).
+     * Conditions du §3.3.1 vérifiées à la confirmation : l'intention vient du super utilisateur et la
+     * session est devenue celle de la cible demandée (un autre utilisateur). L'état « verified » du
+     * super utilisateur et le jeton CSRF sont contrôlés à l'armement (SudoIntent::shouldArm), seul
+     * moment où ils ont un sens ; l'intention ne naît pas autrement.
      */
-    public static function isExemptSignIn(int $superID, int $before, bool $beforeVerified, int $after, ?int $target): bool
+    public static function isExemptSignIn(int $superID, int $before, int $after, ?int $target): bool
     {
         return $target !== null
             && $before === $superID
-            && $beforeVerified
             && $after > 0
             && $after !== $before
             && $after === $target;
     }
 
-    /**
-     * Durée de validité de l'intention notée avant la requête « sudo » : le navigateur enchaîne
-     * immédiatement sur la redirection du cœur.
-     */
-    public const PENDING_TTL = 120;
-
-    public static function isFresh(int $armedAt, int $now, int $ttl = self::PENDING_TTL): bool
+    public static function isFresh(int $armedAt, int $now, int $ttl): bool
     {
         return $armedAt <= $now && ($now - $armedAt) <= $ttl;
     }

@@ -3,7 +3,6 @@
 namespace TackTack\TwoFactor\Http\Controller;
 
 use Concrete\Core\Controller\Controller;
-use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\User\User;
 use Concrete\Core\Validation\CSRF\Token;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +22,8 @@ use TackTack\TwoFactor\Service\UserState;
  */
 class Enrollment extends Controller
 {
+    use RedirectsToPaths;
+
     public const TOKEN = 'tacktack_2fa_enroll';
 
     protected $viewPath = '/two_factor/enroll';
@@ -85,12 +86,12 @@ class Enrollment extends Controller
     {
         $user = $this->app->make(User::class);
         if (!$user->isRegistered()) {
-            return new RedirectResponse((string) $this->app->make('url/manager')->resolve(['/login']));
+            return $this->to('/login');
         }
 
         // Session ouverte par le super utilisateur (§3.3.1) : rien à vérifier ni à enrôler ici.
         if ($this->sessionState()->isImpersonating((int) $user->getUserID())) {
-            return new RedirectResponse((string) $this->app->make('url/manager')->resolve(['/']));
+            return $this->to('/');
         }
 
         $state = $this->state->resolve($user);
@@ -100,7 +101,7 @@ class Enrollment extends Controller
 
         $target = $state === PolicyResolver::PENDING ? '/ccm/2fa/challenge' : '/';
 
-        return new RedirectResponse((string) $this->app->make('url/manager')->resolve([$target]));
+        return $this->to($target);
     }
 
     protected function sessionState(): SessionState

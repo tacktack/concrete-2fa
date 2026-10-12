@@ -3,7 +3,6 @@
 namespace TackTack\TwoFactor\Http\Controller;
 
 use Concrete\Core\Controller\Controller;
-use Concrete\Core\Routing\RedirectResponse;
 use Concrete\Core\Site\Service as SiteService;
 use Concrete\Core\User\PostLoginLocation;
 use Concrete\Core\User\User;
@@ -24,6 +23,8 @@ use TackTack\TwoFactor\Service\UserState;
  */
 class Challenge extends Controller
 {
+    use RedirectsToPaths;
+
     public const TOKEN = 'tacktack_2fa_challenge';
     public const TIMEOUT_SECONDS = 300;
 
@@ -173,10 +174,5 @@ class Challenge extends Controller
         $this->app->make(User::class)->logout();
 
         return $this->to($path);
-    }
-
-    protected function to(string $path): RedirectResponse
-    {
-        return new RedirectResponse((string) $this->app->make('url/manager')->resolve([$path]));
     }
 }

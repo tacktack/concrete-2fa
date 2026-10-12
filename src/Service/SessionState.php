@@ -152,7 +152,7 @@ class SessionState
     /**
      * Intention de « Se connecter en tant que », notée AVANT la requête : le cœur termine
      * l'action par exit (Controller::redirect), le middleware ne reprend donc jamais la main
-     * après elle. Confirmée (ou jetée) par la première requête suivante : voir takeSudoPending().
+     * après elle. Confirmée (ou jetée) par une requête suivante : voir peekSudoPending() puis clearSudoPending(), pilotés par SudoIntent::evaluate().
      */
     public function armSudo(int $origin, int $target): void
     {

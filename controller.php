@@ -61,7 +61,7 @@ class Controller extends Package
     /**
      * @var string
      */
-    protected $pkgVersion = '1.0.0';
+    protected $pkgVersion = '1.0.1';
 
     /**
      * Classes dans packages/tacktack_2fa/src/ → namespace \TackTack\TwoFactor.
