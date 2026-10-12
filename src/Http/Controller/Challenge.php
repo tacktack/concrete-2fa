@@ -131,8 +131,14 @@ class Challenge extends Controller
 
     protected function showForm(?string $error): Response
     {
+        // « Utiliser un code de secours » (§3.4) : même formulaire, saisie texte au lieu du pavé
+        // numérique. Le serveur reconnaît le type de code à sa forme, pas à cette variante.
+        $recovery = (bool) $this->request->query->get('recovery');
+        $challengeUrl = (string) $this->app->make('url/manager')->resolve(['/ccm/2fa/challenge']);
         $this->set('error', $error);
-        $this->set('formAction', (string) $this->app->make('url/manager')->resolve(['/ccm/2fa/challenge']));
+        $this->set('recovery', $recovery);
+        $this->set('formAction', $recovery ? $challengeUrl . '?recovery=1' : $challengeUrl);
+        $this->set('switchUrl', $recovery ? $challengeUrl : $challengeUrl . '?recovery=1');
         $this->set('logoutUrl', (string) $this->app->make('url/manager')->resolve(['/login', 'do_logout', $this->app->make('token')->generate('do_logout')]));
         $this->set('tokenName', self::TOKEN);
 
