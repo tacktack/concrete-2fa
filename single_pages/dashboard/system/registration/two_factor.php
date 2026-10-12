@@ -11,6 +11,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
  * @var array    $users
  * @var bool     $canReset
  * @var int      $myID
+ * @var bool     $isSuper
  */
 $token = app('token');
 $statusLabels = [
@@ -87,6 +88,8 @@ $statusLabels = [
                         <td>
                             <?php if ((int) $u['uID'] === $myID) { ?>
                                 <small class="text-muted"><?= t('Your account') ?></small>
+                            <?php } elseif ((int) $u['uID'] === (int) USER_SUPER_ID && !$isSuper) { ?>
+                                <small class="text-muted"><?= t('Super user') ?></small>
                             <?php } else { ?>
                                 <form method="post" class="d-flex gap-1 align-items-center flex-wrap" autocomplete="off">
                                     <?php $token->output('tacktack_2fa_admin_action'); ?>

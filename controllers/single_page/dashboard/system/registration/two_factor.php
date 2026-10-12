@@ -31,10 +31,12 @@ class TwoFactor extends DashboardPageController
         $this->set('selectedGroups', $config->groups());
         $this->set('graceDays', $config->graceDays());
         $this->set('issuer', (string) $config->issuer());
-        $this->set('groups', $this->app->make(Connection::class)->fetchAllAssociative('SELECT gID, gName FROM `Groups` ORDER BY gName'));
+        $this->set('groups', $this->app->make(Connection::class)->fetchAllAssociative('SELECT gID, gName FROM `Groups` WHERE gID > ' . (int) REGISTERED_GROUP_ID . ' ORDER BY gName'));
         $this->set('users', $this->app->make(OverviewService::class)->concernedUsers());
         $this->set('canReset', $this->canReset());
-        $this->set('myID', (int) $this->app->make(User::class)->getUserID());
+        $me = $this->app->make(User::class);
+        $this->set('myID', (int) $me->getUserID());
+        $this->set('isSuper', (bool) $me->isSuperUser());
     }
 
     public function save_settings()
@@ -46,7 +48,7 @@ class TwoFactor extends DashboardPageController
         $groupIDs = [];
         foreach ((array) $this->request->request->get('groups', []) as $gID) {
             $gID = (int) $gID;
-            if ($gID > 0 && \Concrete\Core\User\Group\Group::getByID($gID)) {
+            if ($gID > REGISTERED_GROUP_ID && \Concrete\Core\User\Group\Group::getByID($gID)) {
                 $groupIDs[] = $gID;
             }
         }
@@ -116,6 +118,13 @@ class TwoFactor extends DashboardPageController
         $uID = (int) $this->request->request->get('uID');
         if ($uID <= 0) {
             $this->error->add(t('User not found.'));
+
+            return;
+        }
+        // Même règle que le cœur (UserInfoResponse::canEditUser) : seul le super utilisateur
+        // peut agir sur le super utilisateur.
+        if ($uID === (int) USER_SUPER_ID && !$me->isSuperUser()) {
+            $this->error->add(t('Access denied.'));
 
             return;
         }

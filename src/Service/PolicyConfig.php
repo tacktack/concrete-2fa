@@ -43,7 +43,26 @@ class PolicyConfig
             $value = $this->defaults->get(self::NS . 'groups', []);
         }
 
-        return array_values(array_unique(array_map('intval', (array) $value)));
+        return self::filterGroups((array) $value);
+    }
+
+    /**
+     * Les groupes implicites « Invités » et « Utilisateurs enregistrés » sont exclus : tout
+     * utilisateur connecté en fait partie sans ligne en base, donc les cocher imposerait la 2FA à
+     * tous les membres du site, absents de la liste du Dashboard. « 2FA pour tous » est une
+     * décision de politique, pas une case à cocher.
+     *
+     * @param array $groups
+     *
+     * @return int[]
+     */
+    public static function filterGroups(array $groups): array
+    {
+        $groups = array_filter(array_map('intval', $groups), static function (int $gID): bool {
+            return $gID > REGISTERED_GROUP_ID;
+        });
+
+        return array_values(array_unique($groups));
     }
 
     public function graceDays(): int
@@ -71,7 +90,7 @@ class PolicyConfig
      */
     public function save(array $groups, int $graceDays, ?string $issuer): void
     {
-        $this->database->save(self::NS . 'groups', json_encode(array_values(array_unique(array_map('intval', $groups)))));
+        $this->database->save(self::NS . 'groups', json_encode(self::filterGroups($groups)));
         $this->database->save(self::NS . 'grace_days', $graceDays);
         $this->database->save(self::NS . 'issuer', $issuer === null ? '' : $issuer);
     }
