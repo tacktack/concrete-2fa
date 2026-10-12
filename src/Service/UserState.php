@@ -47,10 +47,20 @@ class UserState
      */
     public function isConcerned(User $user, ?Credential $credential): bool
     {
-        if ((int) $user->getUserID() === USER_SUPER_ID) {
+        if ($credential !== null && $credential->isConfirmed()) {
             return true;
         }
-        if ($credential !== null && $credential->isConfirmed()) {
+
+        return $this->isRequired($user);
+    }
+
+    /**
+     * Imposé par la politique (super utilisateur ou groupe obligatoire), indépendamment d'un
+     * enrôlement volontaire. Seuls les utilisateurs non imposés peuvent désactiver leur 2FA (§3.6).
+     */
+    public function isRequired(User $user): bool
+    {
+        if ((int) $user->getUserID() === USER_SUPER_ID) {
             return true;
         }
         $required = array_map('intval', (array) $this->config->get('tacktack_2fa::policy.groups', []));

@@ -4,19 +4,25 @@ namespace Concrete\Package\Tacktack2fa\Controller\SinglePage\Account;
 
 use Concrete\Core\Page\Controller\AccountPageController;
 use Concrete\Core\User\User;
+use TackTack\TwoFactor\Service\AccountService;
 use TackTack\TwoFactor\Service\EnrollmentException;
 use TackTack\TwoFactor\Service\EnrollmentService;
+use TackTack\TwoFactor\Service\PolicyResolver;
+use TackTack\TwoFactor\Service\UserState;
 
 /**
- * /account/two_factor — activation volontaire (docs/paquet-2fa.md §3.5, §3.6).
+ * /account/two_factor — activation volontaire, statut, régénération des codes de secours et
+ * désactivation (docs/paquet-2fa.md §3.5, §3.6).
  *
- * Étape 3 : activation seulement. Régénération des codes et désactivation viennent à
- * l'étape 6. EnrollmentService refuse tout utilisateur déjà enrôlé, donc cette page ne
- * peut jamais remplacer un secret existant, quel que soit l'état de la session.
+ * Chaque action est un POST avec son propre jeton CSRF. EnrollmentService refuse tout
+ * utilisateur déjà enrôlé : cette page ne peut jamais remplacer un secret existant. Les
+ * actions sur un compte enrôlé exigent en plus l'état « verified » (recalculé ici).
  */
 class TwoFactor extends AccountPageController
 {
-    public const TOKEN = 'tacktack_2fa_enroll';
+    public const TOKEN_ENROLL = 'tacktack_2fa_enroll';
+    public const TOKEN_REGENERATE = 'tacktack_2fa_regenerate';
+    public const TOKEN_DISABLE = 'tacktack_2fa_disable';
 
     public function view()
     {
@@ -25,7 +31,7 @@ class TwoFactor extends AccountPageController
 
     public function confirm()
     {
-        if (!$this->token->validate(self::TOKEN)) {
+        if (!$this->token->validate(self::TOKEN_ENROLL)) {
             $this->error->add($this->token->getErrorMessage());
             $this->showStatus();
 
@@ -42,32 +48,107 @@ class TwoFactor extends AccountPageController
             return;
         }
 
-        $this->set('enrolled', true);
-        $this->set('codes', $codes);
-        $this->set('continueUrl', (string) $this->app->make('url/manager')->resolve(['/account/two_factor']));
-        // Les codes de secours ne s'affichent qu'une fois : réponse non cachable.
-        if (!headers_sent()) {
-            header('Cache-Control: no-store, private');
-        }
+        $this->showCodes($codes);
     }
 
-    protected function showStatus(): void
+    public function regenerate()
     {
-        $service = $this->app->make(EnrollmentService::class);
-        $user = $this->app->make(User::class);
-
-        if ($service->isEnrolled($user)) {
-            $this->set('enrolled', true);
+        if (!$this->token->validate(self::TOKEN_REGENERATE)) {
+            $this->error->add($this->token->getErrorMessage());
+            $this->showStatus();
 
             return;
         }
 
-        $data = $service->begin($user);
-        $this->set('enrolled', false);
+        try {
+            $this->assertVerified();
+            $codes = $this->app->make(AccountService::class)
+                ->regenerateCodes($this->app->make(User::class), (string) $this->request->request->get('code', ''));
+        } catch (EnrollmentException $e) {
+            $this->error->add($e->getMessage());
+            $this->showStatus();
+
+            return;
+        }
+
+        $this->showCodes($codes);
+    }
+
+    public function disable()
+    {
+        if (!$this->token->validate(self::TOKEN_DISABLE)) {
+            $this->error->add($this->token->getErrorMessage());
+            $this->showStatus();
+
+            return;
+        }
+
+        try {
+            $this->assertVerified();
+            $this->app->make(AccountService::class)->disable(
+                $this->app->make(User::class),
+                (string) $this->request->request->get('password', ''),
+                (string) $this->request->request->get('code', '')
+            );
+        } catch (EnrollmentException $e) {
+            $this->error->add($e->getMessage());
+            $this->showStatus();
+
+            return;
+        }
+
+        $this->flash('success', t('Two-factor authentication has been disabled.'));
+
+        return $this->buildRedirect($this->action('view'));
+    }
+
+    /**
+     * @throws EnrollmentException si la session n'est pas « verified »
+     */
+    protected function assertVerified(): void
+    {
+        $state = $this->app->make(UserState::class)->resolve($this->app->make(User::class));
+        if ($state !== PolicyResolver::VERIFIED) {
+            throw new EnrollmentException(t('Access denied.'));
+        }
+    }
+
+    protected function showCodes(array $codes): void
+    {
+        $this->set('mode', 'codes');
+        $this->set('codes', $codes);
+        $this->set('continueUrl', (string) $this->action('view'));
+        $this->noStore();
+    }
+
+    protected function showStatus(): void
+    {
+        $user = $this->app->make(User::class);
+        $enrollment = $this->app->make(EnrollmentService::class);
+
+        if ($enrollment->isEnrolled($user)) {
+            $status = $this->app->make(AccountService::class)->status($user);
+            $this->set('mode', 'status');
+            $this->set('status', $status);
+            $this->set('regenerateAction', (string) $this->action('regenerate'));
+            $this->set('disableAction', (string) $this->action('disable'));
+            $this->set('tokenRegenerate', self::TOKEN_REGENERATE);
+            $this->set('tokenDisable', self::TOKEN_DISABLE);
+
+            return;
+        }
+
+        $data = $enrollment->begin($user);
+        $this->set('mode', 'enroll');
         $this->set('secret', $data['groupedSecret']);
         $this->set('qrSvg', $data['qrSvg']);
         $this->set('formAction', (string) $this->action('confirm'));
-        $this->set('tokenName', self::TOKEN);
+        $this->set('tokenName', self::TOKEN_ENROLL);
+        $this->noStore();
+    }
+
+    protected function noStore(): void
+    {
         if (!headers_sent()) {
             header('Cache-Control: no-store, private');
         }

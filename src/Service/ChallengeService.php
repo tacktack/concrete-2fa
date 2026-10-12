@@ -63,7 +63,10 @@ class ChallengeService
         return $this->remainingRecoveryCodes;
     }
 
-    public function attempt(int $uID, string $input): string
+    /**
+     * @param bool $allowRecovery false pour les actions qui exigent un code TOTP (régénération des codes)
+     */
+    public function attempt(int $uID, string $input, bool $allowRecovery = true): string
     {
         $this->remainingRecoveryCodes = null;
         $credential = $this->em->find(Credential::class, $uID);
@@ -81,7 +84,7 @@ class ChallengeService
 
         $input = trim($input);
         if ($this->recovery->looksLikeRecoveryCode($input)) {
-            $result = $this->tryRecoveryCode($uID, $input);
+            $result = $allowRecovery ? $this->tryRecoveryCode($uID, $input) : self::FAILED;
         } else {
             $result = $this->tryTotp($credential, $input) ? self::OK : self::FAILED;
         }
