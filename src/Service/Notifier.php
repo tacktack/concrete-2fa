@@ -25,6 +25,11 @@ class Notifier
         $this->send('two_factor_enabled', $email, ['siteName' => $siteName]);
     }
 
+    public function recoveryCodeUsed(string $email, string $siteName, int $remaining): void
+    {
+        $this->send('two_factor_recovery_used', $email, ['siteName' => $siteName, 'remaining' => $remaining]);
+    }
+
     protected function send(string $template, string $email, array $params): void
     {
         try {

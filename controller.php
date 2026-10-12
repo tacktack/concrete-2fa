@@ -7,6 +7,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
 use Concrete\Core\Entity\Package as PackageEntity;
 use Concrete\Core\Entity\Permission\IpAccessControlCategory;
 use Concrete\Core\Error\UserMessageException;
+use Concrete\Core\Http\ServerInterface;
 use Concrete\Core\Package\Package;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Page\Single as SinglePage;
@@ -15,6 +16,7 @@ use Concrete\Core\Permission\Access\Entity\GroupEntity;
 use Concrete\Core\Permission\Key\Key as PermissionKey;
 use Concrete\Core\User\Group\Group;
 use Doctrine\ORM\EntityManagerInterface;
+use TackTack\TwoFactor\Http\TwoFactorMiddleware;
 use TackTack\TwoFactor\Routing\RouteList;
 use TackTack\TwoFactor\Service\SecretCipher;
 
@@ -59,7 +61,7 @@ class Controller extends Package
     /**
      * @var string
      */
-    protected $pkgVersion = '0.2.0';
+    protected $pkgVersion = '0.3.0';
 
     /**
      * Classes dans packages/tacktack_2fa/src/ → namespace \TackTack\TwoFactor.
@@ -89,6 +91,15 @@ class Controller extends Package
         $this->registerAutoload();
         $this->app->make('router')->loadRouteList(new RouteList());
         $this->registerServices();
+
+        // Point de contrôle HTTP. Priorité 20 : à l'intérieur de CookieMiddleware (10), pour
+        // que les cookies mis en file par la suite soient appliqués à la réponse (§3.3).
+        if (!$this->app->isRunThroughCommandLineInterface()) {
+            $this->app->make(ServerInterface::class)->addMiddleware(
+                new TwoFactorMiddleware($this->app),
+                TwoFactorMiddleware::PRIORITY
+            );
+        }
     }
 
     /**

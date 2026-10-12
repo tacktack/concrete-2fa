@@ -14,6 +14,7 @@ class SessionState
 {
     public const VERIFIED_KEY = 'tacktack_2fa.verified';
     public const ENROLL_KEY = 'tacktack_2fa.enroll';
+    public const PENDING_SINCE_KEY = 'tacktack_2fa.pending_since';
 
     /** @var SessionInterface */
     protected $session;
@@ -65,5 +66,34 @@ class SessionState
     public function clearPendingSecret(): void
     {
         $this->session->remove(self::ENROLL_KEY);
+    }
+
+    /**
+     * Début de l'étape 2FA (état « pending »), posé une seule fois par le middleware :
+     * un simple rafraîchissement ne remet pas le délai de 5 minutes à zéro (§3.4).
+     * Un marqueur absent ou posé pour un autre uID compte comme expiré.
+     */
+    public function touchPendingSince(int $uID): void
+    {
+        $value = $this->session->get(self::PENDING_SINCE_KEY);
+        if (is_array($value) && (int) ($value['uID'] ?? 0) === $uID) {
+            return;
+        }
+        $this->session->set(self::PENDING_SINCE_KEY, ['uID' => $uID, 'at' => time()]);
+    }
+
+    public function getPendingSince(int $uID): ?int
+    {
+        $value = $this->session->get(self::PENDING_SINCE_KEY);
+        if (!is_array($value) || (int) ($value['uID'] ?? 0) !== $uID || !is_int($value['at'] ?? null)) {
+            return null;
+        }
+
+        return $value['at'];
+    }
+
+    public function clearPendingSince(): void
+    {
+        $this->session->remove(self::PENDING_SINCE_KEY);
     }
 }
