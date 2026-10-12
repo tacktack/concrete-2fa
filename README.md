@@ -1,6 +1,7 @@
 # concrete-2fa
 
 Double authentification TOTP (Google Authenticator, Authy, 1Password…) pour Concrete CMS 9.
+Testée avec **PHP 8.4** et **Concrete CMS 9.5 ou plus récent** (voir « Compatibilité »).
 
 - Codes à usage unique conformes RFC 6238 (SHA-1, 6 chiffres, pas de 30 s, tolérance ±1 pas), rejeu refusé.
 - Secret chiffré au repos (defuse/php-encryption) ; la clé vit dans une variable d'environnement, jamais en base.
@@ -15,44 +16,123 @@ Double authentification TOTP (Google Authenticator, Authy, 1Password…) pour Co
 Le document d'architecture qui fige les décisions de conception et la liste des tests de contournement vit dans
 le dépôt du premier site intégrateur : `docs/paquet-2fa.md` (dépôt Oli).
 
-## Installation
+## Compatibilité
+
+Le paquet fonctionne avec **PHP 8.4** sur **Concrete CMS 9.5 ou plus récent** (version de référence : 9.5.4).
+**Dans le doute, utiliser PHP 8.4 et Concrete CMS > 9.4** : c'est la seule combinaison testée. Le contrôleur
+du paquet déclare Concrete ≥ 9.0.0 et PHP ≥ 8.1, mais ces versions plus anciennes n'ont pas été vérifiées.
+Essayer d'abord sur un environnement de développement avant la production.
+
+## Installation sur un projet Concrete CMS
+
+Le guide ci-dessous suppose un projet géré par Composer (squelette `concretecms/composer`). Le paquet n'est pas
+sur Packagist : il faut déclarer son dépôt.
+
+### 1. Déclarer le dépôt et installer le paquet
+
+Dans le `composer.json` du projet :
+
+```json
+"repositories": [
+  { "type": "vcs", "url": "https://github.com/tacktack/concrete-2fa", "no-api": true }
+]
+```
+
+`no-api: true` évite que Composer interroge l'API GitHub, qui échoue sans jeton ; le dépôt étant public, aucune
+authentification n'est nécessaire. Puis, depuis la racine du projet :
 
 ```bash
-composer require tacktack/concrete-2fa
+composer require tacktack/concrete-2fa:^1.0
 ```
 
-Le paquet s'installe dans `packages/tacktack_2fa` (handle `tacktack_2fa`).
+Le paquet doit atterrir dans le dossier des paquets du projet (handle `tacktack_2fa`). C'est automatique si le
+projet déclare, comme le squelette `concretecms/composer`, le chemin des paquets Concrete pour `composer/installers` :
 
-### 1. Générer la clé de chiffrement — avant l'installation
+```json
+"extra": {
+  "installer-paths": {
+    "public/packages/{$name}": ["type:concrete5-package"]
+  }
+}
+```
 
-Une clé **par environnement**, jamais versionnée. Les commandes `2fa:*` n'existent qu'une fois le paquet installé :
-avant, utiliser l'outil fourni par defuse :
+Après l'installation, vérifier que le dossier `public/packages/tacktack_2fa/` existe (adapter `public/` si le
+projet utilise un autre dossier web).
+
+### 2. Générer la clé de chiffrement — avant l'installation du paquet
+
+**Une clé par site et par environnement** (développement, staging, production), jamais versionnée, jamais celle d'un
+autre projet. Les commandes `2fa:*` n'existent qu'une fois le paquet installé : avant, utiliser l'outil fourni par
+defuse, depuis la racine du projet :
 
 ```bash
-vendor/bin/generate-defuse-key
+php -d display_errors=0 vendor/bin/generate-defuse-key
 ```
 
-Placer le résultat dans l'environnement du site (fichier `.env` ou variables du conteneur) :
+(`display_errors=0` évite que des avertissements de PHP 8.4 s'impriment avec la clé quand on copie le résultat.)
+Conserver la clé dans un gestionnaire de mots de passe.
+
+### 3. Mettre la clé à disposition de PHP
+
+La variable s'appelle `TWOFA_ENCRYPTION_KEY`. Le paquet la lit avec `getenv()` : elle doit donc être visible de PHP,
+par exemple par un `.env` si le projet le charge (c'est le cas d'Oli : `symfony/dotenv` dans
+`application/bootstrap/autoload.php`, avec `usePutenv()`), par une variable du conteneur, ou par la configuration
+du serveur. Si PHP-FPM nettoie son environnement
+(`clear_env = yes`), la déclarer explicitement dans le pool.
 
 ```
-TWOFA_ENCRYPTION_KEY="def00000…"
+TWOFA_ENCRYPTION_KEY=def00000…
 ```
+
+**Sauvegardes.** Si le projet sauvegarde son `.env` avec la base de données, ne pas y mettre la clé : une fuite de la
+sauvegarde livrerait alors secrets et clé. La garder dans un fichier séparé, exclu de la sauvegarde (par exemple un
+`env_file` de Docker Compose), et conserver une copie dans le gestionnaire de mots de passe.
 
 Sans clé valide, `c5:package:install` échoue avec un message explicite plutôt que d'installer une 2FA dont les
-secrets seraient illisibles. **Changer la clé rend les secrets existants illisibles** (les codes de secours restent
-utilisables ; `2fa:reset --all` pour repartir de zéro).
+secrets seraient illisibles. **Changer ou perdre la clé rend les secrets existants illisibles** (les codes de secours
+restent utilisables ; `2fa:reset --all` pour repartir de zéro).
 
-### 2. Installer
+### 4. Installer le paquet
 
 ```bash
 concrete/bin/concrete c5:package:install tacktack_2fa
 ```
 
-L'installation crée les deux tables, la catégorie de contrôle d'accès IP, la permission
-`tacktack_2fa_reset` (accordée aux Administrateurs) et deux pages :
+(adapter le chemin à la racine du projet : `vendor/bin/concrete` si le projet l'expose, comme Oli). Si le CLI refuse de tourner en root, ajouter `--allow-as-root` ou utiliser l'utilisateur du
+serveur web.
+
+L'installation crée les deux tables (`TwoFactorCredentials`, `TwoFactorRecoveryCodes`), la catégorie de contrôle
+d'accès IP, la permission `tacktack_2fa_reset` (accordée aux Administrateurs) et deux pages :
 
 - `/account/two_factor` : activation, statut, régénération des codes de secours, désactivation ;
 - `/dashboard/system/registration/two_factor` : politique, utilisateurs concernés, réinitialisation, levée de verrou.
+
+Puis vider le cache pour charger la traduction française :
+
+```bash
+concrete/bin/concrete c5:clear-cache
+```
+
+### 5. Régler la politique
+
+Au Dashboard (voir « Configuration » ci-dessous) : groupes obligatoires, délai de grâce, nom affiché.
+**Par défaut, les Administrateurs sont soumis à la 2FA avec 7 jours de grâce, et le super utilisateur est toujours
+concerné.**
+
+### 6. Enrôler le super utilisateur en premier
+
+Se connecter et ouvrir `/account/two_factor` : scanner le QR code avec une application d'authentification, saisir le
+code, puis **conserver les 10 codes de secours hors ligne**. Se déconnecter et se reconnecter : l'écran de code doit
+s'afficher et accepter le code. Prévenir ensuite les autres comptes concernés avant la fin de leur délai de grâce.
+
+### 7. Prérequis du site
+
+- **Courrier :** les e-mails de sécurité (activation, désactivation, code de secours utilisé, réinitialisation,
+  régénération des codes) supposent que l'envoi de courrier fonctionne. Un échec d'envoi est journalisé et ne bloque
+  jamais l'action.
+- **Apparence :** l'écran de code et l'enrôlement forcé utilisent le thème de base de Concrete, pas celui du site.
+- **Langues :** textes en anglais avec traduction française ; une autre langue demande un fichier de traduction
+  (`languages/<locale>/LC_MESSAGES/messages.mo`).
 
 Après une mise à jour du paquet ou de ses traductions : `concrete/bin/concrete c5:clear-cache`.
 
