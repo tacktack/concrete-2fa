@@ -83,7 +83,7 @@ class Controller extends Package
 
     public function getPackageDescription()
     {
-        return t('Double authentification (TOTP) compatible Google Authenticator, Authy, etc.');
+        return t('Two-factor authentication (TOTP) compatible with Google Authenticator, Authy and similar apps.');
     }
 
     public function on_start()

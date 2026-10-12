@@ -1,0 +1,299 @@
+# Traduction française du paquet tacktack_2fa.
+# This file is distributed under the same license as the tacktack_2fa package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tacktack_2fa 1.0.0\n"
+"Report-Msgid-Bugs-To: contact@tack-tack.fr\n"
+"POT-Creation-Date: 2026-10-12 14:36+0200\n"
+"PO-Revision-Date: 2026-10-12 14:40+0200\n"
+"Last-Translator: Tack Tack <contact@tack-tack.fr>\n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "2FA"
+msgstr "2FA"
+
+msgid "Two-factor authentication (TOTP) compatible with Google Authenticator, Authy and similar apps."
+msgstr "Double authentification (TOTP) compatible avec Google Authenticator, Authy et les applications similaires."
+
+msgid "Two-factor authentication"
+msgstr "Double authentification"
+
+msgid "Two-Factor Authentication"
+msgstr "Double authentification"
+
+msgid "The environment variable %s is missing or invalid. Generate one with `concrete/bin/concrete 2fa:generate-key`, place it in your .env file, then retry the installation."
+msgstr "La variable d'environnement %s est absente ou invalide. Générez-en une avec `concrete/bin/concrete 2fa:generate-key`, placez-la dans votre fichier .env, puis relancez l'installation."
+
+msgid "2FA — Failed Codes"
+msgstr "2FA — Codes refusés"
+
+msgid "Reset Two-Factor Authentication"
+msgstr "Réinitialiser la double authentification"
+
+msgid "Controls whether a user can reset another user's two-factor authentication and lift 2FA lockouts from the Dashboard."
+msgstr "Détermine si un utilisateur peut réinitialiser la double authentification d'un autre utilisateur et lever un verrou 2FA depuis le Dashboard."
+
+msgid "Two-factor authentication has been disabled."
+msgstr "La double authentification a été désactivée."
+
+msgid "Access denied."
+msgstr "Accès refusé."
+
+msgid "The grace period must be a number of days between 0 and 365."
+msgstr "Le délai de grâce doit être un nombre de jours compris entre 0 et 365."
+
+msgid "The name shown in authenticator apps is too long."
+msgstr "Le nom affiché dans les applications d'authentification est trop long."
+
+msgid "Settings saved."
+msgstr "Réglages enregistrés."
+
+msgid "Two-factor authentication has been reset for this user."
+msgstr "La double authentification de cet utilisateur a été réinitialisée."
+
+msgid "The lockout has been lifted."
+msgstr "Le verrou a été levé."
+
+msgid "User not found."
+msgstr "Utilisateur introuvable."
+
+msgid "You cannot do this on your own account. Use your account page instead."
+msgstr "Vous ne pouvez pas faire cela sur votre propre compte. Utilisez plutôt votre page de compte."
+
+msgid "Your password is not valid."
+msgstr "Votre mot de passe n'est pas valide."
+
+msgid "Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password…), then enter the 6-digit code it shows."
+msgstr "Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, 1Password…), puis saisissez le code à 6 chiffres qu'elle affiche."
+
+msgid "QR code"
+msgstr "QR code"
+
+msgid "Can't scan? Enter this key manually:"
+msgstr "Impossible de scanner ? Saisissez cette clé manuellement :"
+
+msgid "Authentication code"
+msgstr "Code d'authentification"
+
+msgid "Enable two-factor authentication"
+msgstr "Activer la double authentification"
+
+msgid "Two-factor authentication is now enabled."
+msgstr "La double authentification est maintenant activée."
+
+msgid "Recovery codes"
+msgstr "Codes de secours"
+
+msgid "Keep these codes somewhere safe. Each one can be used once if you lose access to your authenticator app. They will not be shown again."
+msgstr "Conservez ces codes en lieu sûr. Chacun ne peut servir qu'une fois si vous perdez l'accès à votre application d'authentification. Ils ne seront plus affichés."
+
+msgid "Continue"
+msgstr "Continuer"
+
+msgid "New recovery codes generated on %s"
+msgstr "Nouveaux codes de secours générés sur %s"
+
+msgid "New two-factor recovery codes were just generated for your account at %s. The previous codes no longer work."
+msgstr "De nouveaux codes de secours de double authentification viennent d'être générés pour votre compte sur %s. Les anciens codes ne fonctionnent plus."
+
+msgid "If you did not do this, contact the site administrator immediately."
+msgstr "Si ce n'est pas vous, contactez immédiatement l'administrateur du site."
+
+msgid "Two-factor authentication disabled on %s"
+msgstr "Double authentification désactivée sur %s"
+
+msgid "Two-factor authentication was just disabled on your account at %s."
+msgstr "La double authentification vient d'être désactivée sur votre compte sur %s."
+
+msgid "Two-factor authentication enabled on %s"
+msgstr "Double authentification activée sur %s"
+
+msgid "Two-factor authentication was just enabled on your account at %s."
+msgstr "La double authentification vient d'être activée sur votre compte sur %s."
+
+msgid "A recovery code was used on %s"
+msgstr "Un code de secours a été utilisé sur %s"
+
+msgid "A two-factor recovery code was just used to sign in to your account at %s."
+msgstr "Un code de secours de double authentification vient d'être utilisé pour vous connecter à votre compte sur %s."
+
+msgid "%d recovery code remains."
+msgid_plural "%d recovery codes remain."
+msgstr[0] "%d code de secours reste."
+msgstr[1] "%d codes de secours restent."
+
+msgid "If this was not you, contact the site administrator immediately."
+msgstr "Si ce n'était pas vous, contactez immédiatement l'administrateur du site."
+
+msgid "Two-factor authentication reset on %s"
+msgstr "Double authentification réinitialisée sur %s"
+
+msgid "An administrator reset the two-factor authentication of your account at %s."
+msgstr "Un administrateur a réinitialisé la double authentification de votre compte sur %s."
+
+msgid "If two-factor authentication is required for your account, you will be asked to set it up again the next time you sign in."
+msgstr "Si la double authentification est obligatoire pour votre compte, il vous sera demandé de la configurer à nouveau à votre prochaine connexion."
+
+msgid "If you did not expect this, contact the site administrator."
+msgstr "Si vous ne vous y attendiez pas, contactez l'administrateur du site."
+
+msgid "Two-factor authentication is enabled on your account."
+msgstr "La double authentification est activée sur votre compte."
+
+msgid "Enabled on %s."
+msgstr "Activée le %s."
+
+msgid "%d recovery code remaining."
+msgid_plural "%d recovery codes remaining."
+msgstr[0] "%d code de secours restant."
+msgstr[1] "%d codes de secours restants."
+
+msgid "Regenerate recovery codes"
+msgstr "Régénérer les codes de secours"
+
+msgid "The previous codes will stop working. Enter the current 6-digit code from your authenticator app. If you just signed in with that code, wait for the next one."
+msgstr "Les codes précédents cesseront de fonctionner. Saisissez le code à 6 chiffres actuel de votre application d'authentification. Si vous venez de vous connecter avec ce code, attendez le suivant."
+
+msgid "Disable two-factor authentication"
+msgstr "Désactiver la double authentification"
+
+msgid "Two-factor authentication is required for your account and cannot be disabled."
+msgstr "La double authentification est obligatoire pour votre compte et ne peut pas être désactivée."
+
+msgid "Enter your current password and a code from your authenticator app (or a recovery code)."
+msgstr "Saisissez votre mot de passe actuel et un code de votre application d'authentification (ou un code de secours)."
+
+msgid "Current password"
+msgstr "Mot de passe actuel"
+
+msgid "Enabled"
+msgstr "Activée"
+
+msgid "Grace period"
+msgstr "Délai de grâce"
+
+msgid "Must set up"
+msgstr "À configurer"
+
+msgid "Policy"
+msgstr "Politique"
+
+msgid "Groups required to use two-factor authentication"
+msgstr "Groupes tenus d'utiliser la double authentification"
+
+msgid "The super user is always required. Any user who sets it up voluntarily is then required too."
+msgstr "Le super utilisateur est toujours concerné. Tout utilisateur qui l'active volontairement le devient aussi."
+
+msgid "Grace period (days)"
+msgstr "Délai de grâce (jours)"
+
+msgid "Time left to set up two-factor authentication before it becomes mandatory. 0 means immediately."
+msgstr "Temps laissé pour configurer la double authentification avant qu'elle ne devienne obligatoire. 0 signifie immédiatement."
+
+msgid "Name shown in authenticator apps"
+msgstr "Nom affiché dans les applications d'authentification"
+
+msgid "Leave empty to use the site name."
+msgstr "Laissez vide pour utiliser le nom du site."
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Users concerned"
+msgstr "Utilisateurs concernés"
+
+msgid "No user is concerned yet."
+msgstr "Aucun utilisateur n'est concerné pour l'instant."
+
+msgid "User"
+msgstr "Utilisateur"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Enabled on"
+msgstr "Activée le"
+
+msgid "Failed attempts"
+msgstr "Échecs"
+
+msgid "Lockout"
+msgstr "Verrou"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "until %s"
+msgstr "jusqu'au %s"
+
+msgid "Locked until %s"
+msgstr "Verrouillé jusqu'à %s"
+
+msgid "Your account"
+msgstr "Votre compte"
+
+msgid "Super user"
+msgstr "Super utilisateur"
+
+msgid "Your password"
+msgstr "Votre mot de passe"
+
+msgid "Reset"
+msgstr "Réinitialiser"
+
+msgid "Lift lockout"
+msgstr "Lever le verrou"
+
+msgid "You do not have the permission to reset two-factor authentication."
+msgstr "Vous n'avez pas la permission de réinitialiser la double authentification."
+
+msgid "The form could not be validated. Please try again."
+msgstr "Le formulaire n'a pas pu être validé. Veuillez réessayer."
+
+msgid "The code is not valid, or verification is temporarily unavailable."
+msgstr "Le code n'est pas valide, ou la vérification est temporairement indisponible."
+
+msgid "The password is not valid."
+msgstr "Le mot de passe n'est pas valide."
+
+msgid "Two-factor authentication is already set up for this account."
+msgstr "La double authentification est déjà configurée pour ce compte."
+
+msgid "Your setup session has expired. Reload the page and scan the QR code again."
+msgstr "Votre session de configuration a expiré. Rechargez la page et scannez à nouveau le QR code."
+
+msgid "The code is not valid. Check the code in your app and try again."
+msgstr "Le code n'est pas valide. Vérifiez le code dans votre application et réessayez."
+
+msgid "Two-factor authentication cannot be set up right now. Contact the site administrator."
+msgstr "La double authentification ne peut pas être configurée pour le moment. Contactez l'administrateur du site."
+
+msgid "Enter one of your recovery codes. Each code can be used only once."
+msgstr "Saisissez l'un de vos codes de secours. Chaque code ne peut servir qu'une seule fois."
+
+msgid "Enter the 6-digit code from your authenticator app."
+msgstr "Saisissez le code à 6 chiffres de votre application d'authentification."
+
+msgid "Recovery code"
+msgstr "Code de secours"
+
+msgid "Verify"
+msgstr "Vérifier"
+
+msgid "Sign out"
+msgstr "Se déconnecter"
+
+msgid "Use the code from my authenticator app"
+msgstr "Utiliser le code de mon application d'authentification"
+
+msgid "Use a recovery code"
+msgstr "Utiliser un code de secours"
+
+msgid "Set up two-factor authentication"
+msgstr "Configurer la double authentification"
