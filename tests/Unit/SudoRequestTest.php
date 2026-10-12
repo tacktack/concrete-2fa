@@ -56,3 +56,10 @@ it('exige les trois conditions du §3.3.1', function () {
     // pas d'utilisateur après la requête
     expect(SudoRequest::isExemptSignIn(1, 1, true, 0, 0))->toBeFalse();
 });
+
+it('l\'intention notée avant la requête expire', function () {
+    expect(SudoRequest::isFresh(1000, 1000))->toBeTrue();
+    expect(SudoRequest::isFresh(1000, 1120))->toBeTrue();
+    expect(SudoRequest::isFresh(1000, 1121))->toBeFalse();
+    expect(SudoRequest::isFresh(1000, 999))->toBeFalse();
+});

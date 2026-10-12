@@ -17,6 +17,7 @@ class SessionState
     public const PENDING_SINCE_KEY = 'tacktack_2fa.pending_since';
     public const REMEMBER_KEY = 'tacktack_2fa.remember';
     public const IMPERSONATION_KEY = 'tacktack_2fa.impersonation';
+    public const SUDO_PENDING_KEY = 'tacktack_2fa.sudo_pending';
 
     /** @var SessionInterface */
     protected $session;
@@ -146,5 +147,33 @@ class SessionState
         $value = $this->session->get(self::IMPERSONATION_KEY);
 
         return is_array($value) && (int) ($value['uID'] ?? 0) === $uID && $uID > 0;
+    }
+
+    /**
+     * Intention de « Se connecter en tant que », notée AVANT la requête : le cœur termine
+     * l'action par exit (Controller::redirect), le middleware ne reprend donc jamais la main
+     * après elle. Confirmée (ou jetée) par la première requête suivante : voir takeSudoPending().
+     */
+    public function armSudo(int $origin, int $target): void
+    {
+        $this->session->set(self::SUDO_PENDING_KEY, ['origin' => $origin, 'target' => $target, 'at' => time()]);
+    }
+
+    /**
+     * @return array{origin:int, target:int, at:int}|null
+     */
+    public function peekSudoPending(): ?array
+    {
+        $value = $this->session->get(self::SUDO_PENDING_KEY);
+        if (!is_array($value) || !is_int($value['origin'] ?? null) || !is_int($value['target'] ?? null) || !is_int($value['at'] ?? null)) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    public function clearSudoPending(): void
+    {
+        $this->session->remove(self::SUDO_PENDING_KEY);
     }
 }

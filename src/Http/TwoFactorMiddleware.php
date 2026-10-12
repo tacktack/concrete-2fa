@@ -65,6 +65,24 @@ class TwoFactorMiddleware implements MiddlewareInterface
         $uID = (int) $user->getUserID();
         $sessionState = $this->app->make(SessionState::class);
 
+        // Intention notée avant l'action « Se connecter en tant que » (§3.3.1). Tant que la session
+        // est encore celle de l'origine (requête concurrente, action échouée), on la garde jusqu'à
+        // expiration ; dès que la session appartient à un autre utilisateur, elle est lue et effacée :
+        // elle ne sert qu'une fois, et ne vaut que si cet utilisateur est la cible demandée.
+        $pending = $sessionState->peekSudoPending();
+        if ($pending !== null) {
+            if (!SudoRequest::isFresh($pending['at'], time())) {
+                $sessionState->clearSudoPending();
+            } elseif ($uID !== $pending['origin']) {
+                $sessionState->clearSudoPending();
+                if (SudoRequest::isExemptSignIn($this->superUserID(), $pending['origin'], true, $uID, $pending['target'])) {
+                    $this->grantImpersonation($uID, $pending['origin']);
+
+                    return $frame->next($request);
+                }
+            }
+        }
+
         // Session ouverte par le super utilisateur via « Se connecter en tant que » (§3.3.1) :
         // aucun contrôle, et aucun état calculé (resolve() peut démarrer un délai de grâce, ce
         // qu'un passage de support ne doit pas faire à la place de l'utilisateur).
@@ -78,15 +96,13 @@ class TwoFactorMiddleware implements MiddlewareInterface
             $sessionState->touchPendingSince($uID);
         }
 
-        // « Se connecter en tant que » par le super utilisateur déjà vérifié : on observe le
-        // résultat de la requête, on n'arme rien à l'avance (§3.3.1).
+        // Le super utilisateur déjà vérifié lance l'action « Se connecter en tant que » : on note
+        // l'intention avant la requête. Elle ne vaut rien tant que la session n'a pas basculé
+        // vers la cible (voir plus haut) ; une requête qui échoue la laisse sans effet.
         if ($state === PolicyResolver::VERIFIED && $uID === $this->superUserID()) {
             $signInAs = SudoRequest::targetFromPath($request->getPathInfo());
             if ($signInAs !== null) {
-                $response = $frame->next($request);
-                $this->afterSignInAs($uID, $signInAs);
-
-                return $response;
+                $sessionState->armSudo($uID, $signInAs);
             }
         }
 
@@ -129,27 +145,22 @@ class TwoFactorMiddleware implements MiddlewareInterface
     }
 
     /**
-     * Après la requête « sudo » : si la session est bien devenue celle de la cible, pose la marque
-     * d'exemption et journalise quand un contrôle est réellement sauté. Aucune notification (§3.3.1).
+     * Pose la marque d'exemption et journalise quand un contrôle est réellement sauté. Aucune
+     * notification (§3.3.1).
      */
-    protected function afterSignInAs(int $before, int $target): void
+    protected function grantImpersonation(int $target, int $origin): void
     {
-        $after = (int) $this->app['session']->get('uID');
-        if (!SudoRequest::isExemptSignIn($this->superUserID(), $before, true, $after, $target)) {
-            return;
-        }
-
-        $this->app->make(SessionState::class)->setImpersonation($after, $before);
+        $this->app->make(SessionState::class)->setImpersonation($target, $origin);
 
         // Lecture seule : pas de resolve(), qui écrirait en base pour la cible.
         $state = $this->app->make(UserState::class);
-        $credential = $state->getCredential($after);
-        $targetUser = User::getByUserID($after);
+        $credential = $state->getCredential($target);
+        $targetUser = User::getByUserID($target);
         $skipped = ($credential !== null && $credential->isConfirmed())
             || ($targetUser && $state->isRequired($targetUser));
         if ($skipped) {
             $this->app->make(LoggerFactory::class)->createLogger(Channels::CHANNEL_AUTHENTICATION)
-                ->warning(sprintf('2FA : session ouverte en tant que l\'utilisateur %d par le super utilisateur, étape 2FA sautée.', $after));
+                ->warning(sprintf('2FA : session ouverte en tant que l\'utilisateur %d par le super utilisateur, étape 2FA sautée.', $target));
         }
     }
 

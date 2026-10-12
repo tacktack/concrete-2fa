@@ -90,7 +90,7 @@ class Enrollment extends Controller
 
         // Session ouverte par le super utilisateur (§3.3.1) : rien à vérifier ni à enrôler ici.
         if ($this->sessionState()->isImpersonating((int) $user->getUserID())) {
-            return $this->to('/');
+            return new RedirectResponse((string) $this->app->make('url/manager')->resolve(['/']));
         }
 
         $state = $this->state->resolve($user);

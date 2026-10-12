@@ -47,4 +47,15 @@ class SudoRequest
             && $after !== $before
             && $after === $target;
     }
+
+    /**
+     * Durée de validité de l'intention notée avant la requête « sudo » : le navigateur enchaîne
+     * immédiatement sur la redirection du cœur.
+     */
+    public const PENDING_TTL = 120;
+
+    public static function isFresh(int $armedAt, int $now, int $ttl = self::PENDING_TTL): bool
+    {
+        return $armedAt <= $now && ($now - $armedAt) <= $ttl;
+    }
 }
