@@ -8,11 +8,14 @@ use Concrete\Core\Entity\Package as PackageEntity;
 use Concrete\Core\Entity\Permission\IpAccessControlCategory;
 use Concrete\Core\Error\UserMessageException;
 use Concrete\Core\Package\Package;
+use Concrete\Core\Page\Page;
+use Concrete\Core\Page\Single as SinglePage;
 use Concrete\Core\Permission\Access\Access;
 use Concrete\Core\Permission\Access\Entity\GroupEntity;
 use Concrete\Core\Permission\Key\Key as PermissionKey;
 use Concrete\Core\User\Group\Group;
 use Doctrine\ORM\EntityManagerInterface;
+use TackTack\TwoFactor\Routing\RouteList;
 use TackTack\TwoFactor\Service\SecretCipher;
 
 /**
@@ -56,7 +59,7 @@ class Controller extends Package
     /**
      * @var string
      */
-    protected $pkgVersion = '0.1.0';
+    protected $pkgVersion = '0.2.0';
 
     /**
      * Classes dans packages/tacktack_2fa/src/ → namespace \TackTack\TwoFactor.
@@ -84,6 +87,19 @@ class Controller extends Package
     public function on_start()
     {
         $this->registerAutoload();
+        $this->app->make('router')->loadRouteList(new RouteList());
+        $this->registerServices();
+    }
+
+    /**
+     * Services partagés : la session et la configuration du paquet sont résolues à
+     * l'usage, pas à l'enregistrement.
+     */
+    protected function registerServices()
+    {
+        $this->app->singleton(\TackTack\TwoFactor\Service\SessionState::class, function ($app) {
+            return new \TackTack\TwoFactor\Service\SessionState($app->make('session'));
+        });
     }
 
     /**
@@ -122,6 +138,7 @@ class Controller extends Package
 
         $this->installFailedCodeIpCategory($pkg);
         $this->installResetPermission($pkg);
+        $this->installSinglePages($pkg);
 
         return $pkg;
     }
@@ -138,6 +155,22 @@ class Controller extends Package
         $pkg = $this->getPackageEntity();
         $this->installFailedCodeIpCategory($pkg);
         $this->installResetPermission($pkg);
+        $this->installSinglePages($pkg);
+    }
+
+    /**
+     * Pages du paquet. Idempotent : appelée à la fois par install() et upgrade().
+     */
+    protected function installSinglePages(PackageEntity $pkg): void
+    {
+        $path = '/account/two_factor';
+        if (!Page::getByPath($path)->isError()) {
+            return;
+        }
+        $page = SinglePage::add($path, $pkg);
+        if ($page) {
+            $page->update(['cName' => t('Two-factor authentication')]);
+        }
     }
 
     protected function assertEncryptionKeyConfigured(): void
